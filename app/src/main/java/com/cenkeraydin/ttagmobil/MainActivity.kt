@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.ui.theme.TtagMobilTheme
 
@@ -16,9 +17,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TtagMobilTheme {
-                val navController = rememberNavController()
+                val navController: NavHostController =rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                   AppNavHost()
+                   AppNavHost(navController)
                 }
             }
         }

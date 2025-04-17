@@ -1,5 +1,7 @@
 package com.cenkeraydin.ttagmobil.ui.logins
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,24 +39,31 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.components.PasswordTextField
+import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
+import com.cenkeraydin.ttagmobil.ui.EmailConfirmDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavController) {
     val backgroundImage = painterResource(id = R.drawable.register_background)
-    var selectedRole by remember { mutableStateOf("driver") }
+    var selectedRole by remember { mutableStateOf("Driver") }
     var name by remember { mutableStateOf("") }
     var surName by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val viewModel: RegisterViewModel = viewModel()
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
-    val roleText = if (selectedRole == "driver") "Driver Register" else "Passenger Register"
-    val buttonColor = if (selectedRole == "driver") Color.Red else Color(0xFF00796B)
+    val roleText = if (selectedRole == "Driver") "Driver Register" else "Passenger Register"
+    val buttonColor = if (selectedRole == "Basic") Color.Red else Color(0xFF00796B)
 
     Box(
         modifier = Modifier
@@ -91,11 +101,11 @@ fun RegisterScreen(navController: NavController) {
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoleSelectionButton("Passenger", selectedRole == "passenger") {
-                    selectedRole = "passenger"
+                RoleSelectionButton("Basic", selectedRole == "Basic") {
+                    selectedRole = "Basic"
                 }
-                RoleSelectionButton("Driver", selectedRole == "driver") {
-                    selectedRole = "driver"
+                RoleSelectionButton("Driver", selectedRole == "Driver") {
+                    selectedRole = "Driver"
                 }
             }
 
@@ -113,7 +123,7 @@ fun RegisterScreen(navController: NavController) {
                 value = name,
                 onValueChange = { name = it },
                 label = { Text("Name", color = Color.White) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -132,7 +142,7 @@ fun RegisterScreen(navController: NavController) {
                 value = surName,
                 onValueChange = { surName = it },
                 label = { Text("Surname", color = Color.White) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -151,7 +161,7 @@ fun RegisterScreen(navController: NavController) {
                 value = userName,
                 onValueChange = { userName = it },
                 label = { Text("Username", color = Color.White) },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
                 colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -163,6 +173,23 @@ fun RegisterScreen(navController: NavController) {
                 )
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Phone", color = Color.White) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White,
+                    focusedLabelColor = Color.Blue,
+                    unfocusedLabelColor = Color.Gray,
+                    cursorColor = Color.White
+                )
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
@@ -191,7 +218,26 @@ fun RegisterScreen(navController: NavController) {
 
             Button(
                 onClick = {
-                    // Giriş işlemleri buraya gelecek
+                    val request = RegisterRequest(
+                        firstName = name,
+                        lastName = surName,
+                        email = email,
+                        userName = userName,
+                        phoneNumber = phoneNumber,
+                        password = password,
+                        confirmPassword = password
+                    )
+                    viewModel.registerUser(
+                        request,
+                        onSuccess = {
+                            showConfirmationDialog = true // Kayıt başarılıysa popup açılsın
+                        },
+                        selectedRole = selectedRole,
+                        onError = {
+                            Log.e("RegisterError", "Kayıt başarısız: $it")
+                            Toast.makeText(context, "Kayıt başarısız: $it", Toast.LENGTH_SHORT).show()
+                        }
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = Modifier.fillMaxWidth()
@@ -202,7 +248,33 @@ fun RegisterScreen(navController: NavController) {
             TextButton(onClick = { navController.navigate("login") }) {
                 Text("Already have an account? Sign In", color = Color.White)
             }
+
+            viewModel.registrationState?.let { state ->
+                Text(
+                    text = when {
+                        state == "success" -> "Kayıt başarılı!"
+                        state?.startsWith("error") == true -> "Kayıt başarısız: $state"
+                        state?.startsWith("failure") == true -> "Sunucuya bağlanılamadı: $state"
+                        else -> ""
+                    },
+                    color = if (state == "success") Color.Green else Color.Red
+                )
+                Log.e("RegisterError", state)
+
+            }
+
+            if (showConfirmationDialog) {
+                EmailConfirmDialog(
+                    email = email,
+                    onDismiss = { showConfirmationDialog = false },
+                    onSuccess = {
+                        showConfirmationDialog = false
+                        navController.navigate("home")
+                    }
+                )
+            }
         }
+
     }
 }
 

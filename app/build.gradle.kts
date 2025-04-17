@@ -61,5 +61,20 @@ dependencies {
 
     //Lottie
     implementation(libs.lottie.compose)
+    implementation(libs.androidx.material)
+
+    //Retrofit
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+
+    //DataStore
+    implementation (libs.androidx.datastore.preferences)
+
+    //Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.compose.v240)
+
+
+
 
 }
