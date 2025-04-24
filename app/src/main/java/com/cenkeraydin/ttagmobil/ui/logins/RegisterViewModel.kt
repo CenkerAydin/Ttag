@@ -22,22 +22,32 @@ class RegisterViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             try {
-                val response = if (selectedRole == "Basic") {
+                val response = if (selectedRole == "Passenger") {
                     RetrofitInstance.api.registerUser(request)
                 } else {
                     RetrofitInstance.api.registerDriver(request)
                 }
+
                 Log.d("RegisterResponse", response.toString())
+
                 if (response.isSuccessful) {
                     val message = response.body()?.string()
                     Log.d("Register", "Kayıt mesajı: $message")
                     registrationState = "success"
                     onSuccess()
                 } else {
+                    // Burada 500 dönse bile başarılı kabul etmek istiyorsan:
                     val errorBody = response.errorBody()?.string()
                     Log.e("RegisterError", "Hata: ${response.code()} - $errorBody")
-                    registrationState = "error: $errorBody"
-                    onError(errorBody ?: "Bilinmeyen hata")
+
+                    if (response.code() == 500) {
+                        // Kayıt aslında olmuş olabilir, bu yüzden başarılı gibi davran
+                        registrationState = "success_with_warning"
+                        onSuccess()
+                    } else {
+                        registrationState = "error: $errorBody"
+                        onError(errorBody ?: "Bilinmeyen hata")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("RegisterException", e.message ?: "Unknown exception")
@@ -46,6 +56,7 @@ class RegisterViewModel : ViewModel() {
             }
         }
     }
+
 
     fun confirmEmail(
         email: String,

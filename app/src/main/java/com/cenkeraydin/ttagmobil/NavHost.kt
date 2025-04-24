@@ -14,11 +14,11 @@ import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.ui.BottomNav.BottomNavigationBar
 import com.cenkeraydin.ttagmobil.ui.home.CarScreen
 import com.cenkeraydin.ttagmobil.ui.home.HomeScreen
-import com.cenkeraydin.ttagmobil.ui.home.ProfileScreen
 import com.cenkeraydin.ttagmobil.ui.home.ReservationScreen
 import com.cenkeraydin.ttagmobil.ui.logins.LoginScreen
 import com.cenkeraydin.ttagmobil.ui.logins.LoginViewModel
 import com.cenkeraydin.ttagmobil.ui.logins.RegisterScreen
+import com.cenkeraydin.ttagmobil.ui.profile.ProfileScreen
 import com.cenkeraydin.ttagmobil.ui.splash.AnimatedSplashScreen
 
 
@@ -30,7 +30,6 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    var viewModel: LoginViewModel = viewModel()
     Scaffold(
         bottomBar = {
             if (currentRoute in bottomBarRoutes) {

@@ -3,17 +3,22 @@ package com.cenkeraydin.ttagmobil.data.retrofit
 import com.cenkeraydin.ttagmobil.data.model.AuthBody
 import com.cenkeraydin.ttagmobil.data.model.AuthResponse
 import com.cenkeraydin.ttagmobil.data.model.CarResponse
+import com.cenkeraydin.ttagmobil.data.model.DeleteAccountResponse
 import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordRequest
 import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordResponse
 import com.cenkeraydin.ttagmobil.data.model.LoginRequest
 import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
 import com.cenkeraydin.ttagmobil.data.model.ResetPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.UpdateUserInfoRequest
+import com.cenkeraydin.ttagmobil.data.model.UserInfoResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 interface ApiService {
@@ -45,6 +50,20 @@ interface ApiService {
 
     @GET("/api/v1/car")
     suspend fun getCars(): Response<CarResponse>
+
+    @GET("api/UserManagement/info")
+    suspend fun getUserInfo(@Query("email") email: String): Response<UserInfoResponse>
+
+    @PUT("api/UserManagement/info")
+    suspend fun updateUserInfo(
+        @Body request: UpdateUserInfoRequest
+    ): Response<Void>
+
+    @DELETE("api/UserManagement/account")
+    suspend fun deleteAccount(
+        @Query("email") email: String
+    ): Response<DeleteAccountResponse>
+
 
 }
 

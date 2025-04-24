@@ -1,20 +1,25 @@
 package com.cenkeraydin.ttagmobil.ui.logins
 
+import android.app.Application
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordRequest
 import com.cenkeraydin.ttagmobil.data.model.LoginRequest
 import com.cenkeraydin.ttagmobil.data.model.ResetPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.User
 import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance
+import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var loginState by mutableStateOf<String?>(null)
         private set
 
@@ -23,29 +28,49 @@ class LoginViewModel : ViewModel() {
     var resetToken by mutableStateOf("")
 
 
-    fun loginUser(request: LoginRequest, navController: NavController, context: Context) {
+    fun loginUser(
+        request: LoginRequest,
+        navController: NavController,
+        context: Context,
+        profileViewModel: ProfileViewModel
+    ) {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.loginUser(request)
                 Log.e("LoginResponse", response.toString())
 
                 if (response.isSuccessful) {
-                    val token = response.body()?.jwToken
+                    val authBody = response.body()
 
-                    if (!token.isNullOrBlank()) {
-                        // Token'ı SharedPreferences'e kaydet
+                    if (authBody != null && authBody.jwToken.isNotBlank()) {
+                        // 🔐 Token'ı sakla
                         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
-                        prefs.edit().putString("jwt_token", token).apply()
+                        prefs.edit().putString("jwt_token", authBody.jwToken).apply()
 
-                        Log.d("JWT Token", token)
-                        loginState = "Tebrikler! Başarıyla giriş yaptınız"
+                        val userInfoResponse = RetrofitInstance.api.getUserInfo(request.email)
 
+                        if (userInfoResponse.isSuccessful) {
+                            val userData = userInfoResponse.body()?.data
+                            if (userData != null) {
+                                val user = User(
+                                    firstName = userData.firstName ?: "",
+                                    lastName = userData.lastName ?: "",
+                                    email = userData.email ?: "",
+                                    phoneNumber = userData.phoneNumber ?: "",
+                                    userName = userData.userName ?: ""
+                                )
+                                profileViewModel.setUser(user)
+                            }
+                        } else {
+                            Log.e("LoginError", "Kullanıcı bilgileri alınamadı!")
+                        }
+                        loginState = "Giriş başarılı"
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
                         }
                     } else {
                         loginState = "Token alınamadı!"
-                        Log.e("LoginError", "jwToken null veya boş")
+                        Log.e("LoginError", "authBody null veya jwToken boş")
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
@@ -59,12 +84,11 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun logoutUser(context: Context, navController: NavController) {
+    fun logoutUser(context: Context, navController: NavHostController, profileViewModel: ProfileViewModel) {
         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
         prefs.edit().remove("jwt_token").apply()
 
         val token = prefs.getString("jwt_token", null)
-
         if (token == null) {
             Log.d("Logout", "Token başarıyla silindi!")
         } else {
@@ -74,7 +98,11 @@ class LoginViewModel : ViewModel() {
         navController.navigate("login") {
             popUpTo("home") { inclusive = true }
         }
+        profileViewModel.logout(navController)
+
+
     }
+
 
 
 

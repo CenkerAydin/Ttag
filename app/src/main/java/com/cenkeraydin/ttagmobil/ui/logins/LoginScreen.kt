@@ -48,6 +48,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.components.PasswordTextField
 import com.cenkeraydin.ttagmobil.data.model.LoginRequest
+import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,6 +62,7 @@ fun LoginScreen(navController: NavController) {
     val roleText = if (selectedRole == "driver") "Driver Login" else "Passenger Login"
     val buttonColor = if (selectedRole == "driver") Color(0xFFd32f2f) else Color(0xFF00796B)
 
+    val profileViewModel: ProfileViewModel = viewModel()
     val loginState = viewModel.loginState
 
     LaunchedEffect(loginState) {
@@ -133,13 +135,6 @@ fun LoginScreen(navController: NavController) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.White,
-                    focusedLabelColor = Color.Blue,
-                    unfocusedLabelColor = Color.Gray,
-                    cursorColor = Color.White
-                )
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -153,7 +148,7 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick = {
                     val request = LoginRequest(email, password)
-                    viewModel.loginUser(request, navController,context)
+                    viewModel.loginUser(request, navController,context,profileViewModel)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = Modifier.fillMaxWidth()

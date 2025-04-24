@@ -105,12 +105,8 @@ fun CarScreen(navHostController: NavHostController) {
 @Composable
 fun CarCard(car: Car, navHostController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
-
-    val imageUrls = listOf(
-        "https://ttagstorage.blob.core.windows.net/ttagupload/vito1.jpg",
-        "https://ttagstorage.blob.core.windows.net/ttagupload/vito2.jpg",
-        "https://ttagstorage.blob.core.windows.net/ttagupload/vito3.jpg"
-    )
+    val viewModel: CarViewModel = viewModel()
+    val imageUrls = viewModel.getImageUrlsForCar(car)
 
     Card(
         modifier = Modifier

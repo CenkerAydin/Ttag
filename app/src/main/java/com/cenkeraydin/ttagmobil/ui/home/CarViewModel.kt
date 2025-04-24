@@ -29,4 +29,26 @@ class CarViewModel : ViewModel() {
             }
         }
     }
+
+    fun getImageUrlsForCar(car: Car): List<String> {
+        return when (car.carModel.lowercase()) {
+            "vito" -> listOf(
+                "https://ttagstorage.blob.core.windows.net/ttagupload/vito1.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/vito2.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/vito3.jpg"
+            )
+            "cla" -> listOf(
+                "https://ttagstorage.blob.core.windows.net/ttagupload/cla1.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/cla2.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/cla3.jpg"
+
+            )
+            "g63" -> listOf(
+                "https://ttagstorage.blob.core.windows.net/ttagupload/g631.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/g632.jpg",
+                "https://ttagstorage.blob.core.windows.net/ttagupload/g633.jpg"
+            )
+            else -> listOf("https://ralfvanveen.com/en/glossary/placeholder/") // default görsel
+        }
+    }
 }

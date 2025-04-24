@@ -45,13 +45,15 @@ import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.components.PasswordTextField
 import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
+import com.cenkeraydin.ttagmobil.data.model.User
 import com.cenkeraydin.ttagmobil.ui.EmailConfirmDialog
+import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(navController: NavController) {
     val backgroundImage = painterResource(id = R.drawable.register_background)
-    var selectedRole by remember { mutableStateOf("Driver") }
+    var selectedRole by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var surName by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
@@ -61,9 +63,9 @@ fun RegisterScreen(navController: NavController) {
     val context = LocalContext.current
     val viewModel: RegisterViewModel = viewModel()
     var showConfirmationDialog by remember { mutableStateOf(false) }
-
+    val profileViewModel : ProfileViewModel = viewModel()
     val roleText = if (selectedRole == "Driver") "Driver Register" else "Passenger Register"
-    val buttonColor = if (selectedRole == "Basic") Color.Red else Color(0xFF00796B)
+    val buttonColor = if (selectedRole == "Passenger") Color.Red else Color(0xFF00796B)
 
     Box(
         modifier = Modifier
@@ -101,8 +103,8 @@ fun RegisterScreen(navController: NavController) {
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoleSelectionButton("Basic", selectedRole == "Basic") {
-                    selectedRole = "Basic"
+                RoleSelectionButton("Passenger", selectedRole == "Passenger") {
+                    selectedRole = "Passenger"
                 }
                 RoleSelectionButton("Driver", selectedRole == "Driver") {
                     selectedRole = "Driver"
@@ -230,7 +232,9 @@ fun RegisterScreen(navController: NavController) {
                     viewModel.registerUser(
                         request,
                         onSuccess = {
-                            showConfirmationDialog = true // Kayıt başarılıysa popup açılsın
+                            navController.navigate("home") {
+                                popUpTo("register") { inclusive = true }
+                            }
                         },
                         selectedRole = selectedRole,
                         onError = {
@@ -238,6 +242,14 @@ fun RegisterScreen(navController: NavController) {
                             Toast.makeText(context, "Kayıt başarısız: $it", Toast.LENGTH_SHORT).show()
                         }
                     )
+                    val user = User(
+                        firstName = name,
+                        lastName = surName,
+                        phoneNumber = phoneNumber,
+                        email = email,
+                        userName = userName
+                    )
+                    profileViewModel.setUser(user)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = Modifier.fillMaxWidth()
