@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,7 +32,7 @@ fun PasswordTextField(password: String, onPasswordChange: (String) -> Unit) {
     OutlinedTextField(
         value = password,
         onValueChange = onPasswordChange,
-        label = { Text("Password", color = Color.White) },
+        label = { Text(stringResource(R.string.password), color = Color.White) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         modifier = Modifier.fillMaxWidth(),

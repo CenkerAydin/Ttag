@@ -16,7 +16,5 @@
         <item name="android:navigationBarColor">@color/black</item>
     </style>
 
+
 </resources>
-
-
-

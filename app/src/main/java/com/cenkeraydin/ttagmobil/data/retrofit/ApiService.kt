@@ -1,24 +1,29 @@
 package com.cenkeraydin.ttagmobil.data.retrofit
 
-import com.cenkeraydin.ttagmobil.data.model.AuthBody
-import com.cenkeraydin.ttagmobil.data.model.AuthResponse
-import com.cenkeraydin.ttagmobil.data.model.CarResponse
-import com.cenkeraydin.ttagmobil.data.model.DeleteAccountResponse
-import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordRequest
-import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordResponse
-import com.cenkeraydin.ttagmobil.data.model.LoginRequest
-import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
-import com.cenkeraydin.ttagmobil.data.model.ResetPasswordRequest
-import com.cenkeraydin.ttagmobil.data.model.UpdateUserInfoRequest
-import com.cenkeraydin.ttagmobil.data.model.UserInfoResponse
+import com.cenkeraydin.ttagmobil.data.model.auth.AuthBody
+import com.cenkeraydin.ttagmobil.data.model.car.CarResponse
+import com.cenkeraydin.ttagmobil.data.model.account.DeleteAccountResponse
+import com.cenkeraydin.ttagmobil.data.model.account.DriverInfoResponse
+import com.cenkeraydin.ttagmobil.data.model.auth.ForgotPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.ForgotPasswordResponse
+import com.cenkeraydin.ttagmobil.data.model.auth.LoginRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.RegisterRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.ResetPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.account.UpdateDriverInfoRequest
+import com.cenkeraydin.ttagmobil.data.model.account.UpdateUserInfoRequest
+import com.cenkeraydin.ttagmobil.data.model.account.UserInfoResponse
+import com.cenkeraydin.ttagmobil.data.model.car.CarCreateRequest
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface ApiService {
@@ -38,14 +43,24 @@ interface ApiService {
     ): Response<Void>
 
     @POST("api/Account/forgot-password")
-    suspend fun forgotPassword(
+    suspend fun forgotPasswordAccount(
         @Body request: ForgotPasswordRequest
     ): Response<ForgotPasswordResponse>
 
+
     @POST("api/Account/reset-password")
-    suspend fun resetPassword(
+    suspend fun resetAccountPassword(
         @Body request: ResetPasswordRequest
     ): Response<ResponseBody>
+
+    @POST("api/Driver/authenticate")
+    suspend fun loginDriver(@Body request: LoginRequest): Response<AuthBody>
+
+    @POST("api/Driver/reset-password")
+    suspend fun resetDriverPassword(
+        @Body request: ResetPasswordRequest
+    ): Response<ResponseBody>
+
 
 
     @GET("/api/v1/car")
@@ -63,6 +78,49 @@ interface ApiService {
     suspend fun deleteAccount(
         @Query("email") email: String
     ): Response<DeleteAccountResponse>
+
+    @GET("api/DriverManagement/info")
+    suspend fun getDriverInfo(@Query("email") email: String): Response<DriverInfoResponse>
+
+
+    @DELETE("api/DriverManagement/account")
+    suspend fun deleteDriverAccount(
+        @Query("email") email: String
+    ): Response<DeleteAccountResponse>
+
+    @PUT("api/DriverManagement/info")
+    suspend fun updateDriverInfo(
+        @Body request: UpdateDriverInfoRequest
+    ): Response<Void>
+
+
+    @Multipart
+    @POST("/api/Image/profilePictureEdit")
+    suspend fun uploadProfilePicture(
+        @Part image: MultipartBody.Part,
+        @Part("UserId") userId: RequestBody?
+    ): Response<Unit>
+
+    @Multipart
+    @POST("api/image/driverLicenseEdit")
+    suspend fun uploadDriverLicense(
+        @Part image: MultipartBody.Part,
+        @Part("userId") userId: RequestBody,
+        ): Response<Unit>
+
+    @POST("api/DriverManagement/car")
+    suspend fun addCar(@Body car: CarCreateRequest): Response<Unit>
+
+    @Multipart
+    @POST("api/Image/carImageEdit")
+    suspend fun uploadCarImage(
+        @Part image: MultipartBody.Part,
+        @Part("CarId") carId: RequestBody,
+    ): Response<Unit>
+
+
+
+
 
 
 }

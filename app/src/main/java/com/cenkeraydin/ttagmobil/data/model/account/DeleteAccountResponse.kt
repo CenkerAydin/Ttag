@@ -1,4 +1,4 @@
-package com.cenkeraydin.ttagmobil.data.model
+package com.cenkeraydin.ttagmobil.data.model.account
 
 data class DeleteAccountResponse(
     val succeeded: Boolean,

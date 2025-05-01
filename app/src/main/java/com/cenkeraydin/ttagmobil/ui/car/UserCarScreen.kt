@@ -1,4 +1,4 @@
-package com.cenkeraydin.ttagmobil.ui.home
+package com.cenkeraydin.ttagmobil.ui.car
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,13 +16,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,23 +35,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.cenkeraydin.ttagmobil.data.model.Car
+import com.cenkeraydin.ttagmobil.R
+import com.cenkeraydin.ttagmobil.data.model.car.Car
 
 @Composable
-fun CarScreen(navHostController: NavHostController) {
+fun UserCarScreen(navHostController: NavHostController) {
     val viewModel: CarViewModel = viewModel()
-    val cars = viewModel.cars
-    val error = viewModel.errorMessage
+    val carsUsers = viewModel.cars_users
+    val error by viewModel.errorMessages
 
 
     LaunchedEffect(Unit) {
-        viewModel.fetchCars()
+        viewModel.getCarsForUser()
     }
 
 
@@ -78,13 +81,13 @@ fun CarScreen(navHostController: NavHostController) {
                         .padding(innerPadding), // BottomNav yüksekliği kadar boşluk
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
-                    items(cars) { car ->
-                        CarCard(car = car, navHostController = navHostController)
+                    items(carsUsers) { car ->
+                        CarCardUsers(car = car, navHostController = navHostController)
                     }
                     item {
                         Spacer(modifier = Modifier.height(24.dp)) // Liste sonunda boşluk
                         Text(
-                            text = "Yakında daha fazlası gelecek...",
+                            text = stringResource(R.string.more_coming),
                             color = Color.Gray,
                             fontStyle = FontStyle.Italic,
                             modifier = Modifier
@@ -103,7 +106,7 @@ fun CarScreen(navHostController: NavHostController) {
 
 
 @Composable
-fun CarCard(car: Car, navHostController: NavHostController) {
+fun CarCardUsers(car: Car, navHostController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
     val viewModel: CarViewModel = viewModel()
     val imageUrls = viewModel.getImageUrlsForCar(car)
@@ -122,11 +125,11 @@ fun CarCard(car: Car, navHostController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Marka: ${car.carBrand}")
-                Text("Model: ${car.carModel}")
-                Text("Yolcu Kapasitesi: ${car.passengerCapacity}")
-                Text("Bagaj Kapasitesi: ${car.luggageCapacity}")
-                Text("Fiyat: ${car.price}")
+                Text(stringResource(R.string.brand)+": ${car.carBrand}")
+                Text(stringResource(R.string.model)+": ${car.carModel}")
+                Text(stringResource(R.string.passenger_capacity)+": ${car.passengerCapacity}")
+                Text(stringResource(R.string.luggage_capacity)+": ${car.luggageCapacity}")
+                Text(stringResource(R.string.price) +": ${car.price}")
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -144,21 +147,21 @@ fun CarCard(car: Car, navHostController: NavHostController) {
     }
 
     if (showDialog) {
-        CarImageDialog(images = imageUrls, onDismiss = { showDialog = false })
+        CarImageDialogUsers(images = imageUrls, onDismiss = { showDialog = false })
     }
 }
 
 
 @Composable
-fun CarImageDialog(images: List<String>, onDismiss: () -> Unit) {
+fun CarImageDialogUsers(images: List<String>, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Kapat")
+                Text(stringResource(R.string.close))
             }
         },
-        title = { Text("Araç Görselleri") },
+        title = { Text(stringResource(R.string.car_images)) },
         text = {
             Column {
                 images.forEach { url ->

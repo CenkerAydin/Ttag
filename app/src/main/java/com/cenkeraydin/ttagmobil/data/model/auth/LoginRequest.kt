@@ -1,4 +1,4 @@
-package com.cenkeraydin.ttagmobil.data.model
+package com.cenkeraydin.ttagmobil.data.model.auth
 
 data class LoginRequest(
     val email: String,

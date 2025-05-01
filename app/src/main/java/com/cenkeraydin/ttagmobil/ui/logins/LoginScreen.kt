@@ -22,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,20 +47,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.components.PasswordTextField
-import com.cenkeraydin.ttagmobil.data.model.LoginRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.LoginRequest
 import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavController) {
     val backgroundImage = painterResource(id = R.drawable.beautiful_sunset)
-    var selectedRole by remember { mutableStateOf("passenger") }
+    var selectedRole by remember { mutableStateOf("Passenger") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val viewModel: LoginViewModel = viewModel()
     val context = LocalContext.current
-    val roleText = if (selectedRole == "driver") "Driver Login" else "Passenger Login"
-    val buttonColor = if (selectedRole == "driver") Color(0xFFd32f2f) else Color(0xFF00796B)
+    val roleText = if (selectedRole == "Driver") stringResource(R.string.driver_login) else stringResource(R.string.passenger_login)
+    val buttonColor = if (selectedRole == "Driver") Color(0xFFd32f2f) else Color(0xFF00796B)
 
     val profileViewModel: ProfileViewModel = viewModel()
     val loginState = viewModel.loginState
@@ -94,7 +94,7 @@ fun LoginScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Welcome Again!",
+                text = stringResource(R.string.welcome_back),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -109,11 +109,11 @@ fun LoginScreen(navController: NavController) {
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoleSelectionButton("Passenger", selectedRole == "passenger") {
-                    selectedRole = "passenger"
+                RoleSelectionButton(stringResource(R.string.passenger), selectedRole == "Passenger") {
+                    selectedRole = "Passenger"
                 }
-                RoleSelectionButton("Driver", selectedRole == "driver") {
-                    selectedRole = "driver"
+                RoleSelectionButton(stringResource(R.string.driver), selectedRole == "Driver") {
+                    selectedRole = "Driver"
                 }
             }
 
@@ -131,7 +131,7 @@ fun LoginScreen(navController: NavController) {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email", color = Color.White) },
+                label = { Text(stringResource(R.string.email), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -148,12 +148,19 @@ fun LoginScreen(navController: NavController) {
             Button(
                 onClick = {
                     val request = LoginRequest(email, password)
-                    viewModel.loginUser(request, navController,context,profileViewModel)
+                    Log.e("SelectedRole", selectedRole)
+                    viewModel.loginUser(
+                        request,
+                        navController,
+                        context,
+                        profileViewModel,
+                        selectedRole
+                    )
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login", color = Color.White)
+                Text(stringResource(R.string.login), color = Color.White)
             }
             TextButton(onClick = {
                 if (email.isNotEmpty()) {
@@ -166,12 +173,12 @@ fun LoginScreen(navController: NavController) {
                     ).show()
                 }
             }) {
-                Text("Forgot Password?", color = Color.White)
+                Text(stringResource(R.string.forgot_password), color = Color.White)
             }
 
 
             TextButton(onClick = { navController.navigate("register") }) {
-                Text("Don't have an account? Sign Up", color = Color.White)
+                Text(stringResource(R.string.dont_have_account), color = Color.White)
             }
 
             if (viewModel.showResetDialog) {
@@ -186,18 +193,22 @@ fun LoginScreen(navController: NavController) {
                                 email = viewModel.resetEmail,
                                 token = viewModel.resetToken,
                                 password = newPassword,
-                                confirmPassword = confirmPassword
+                                confirmPassword = confirmPassword,
+                                selectedRole = selectedRole
 
                             )
-                            Log.e("ResetPassword", "Email: ${viewModel.resetEmail}, Token: ${viewModel.resetToken}, Password: $newPassword")
+                            Log.e(
+                                "ResetPassword",
+                                "Email: ${viewModel.resetEmail}, Token: ${viewModel.resetToken}, Password: $newPassword"
+                            )
                             viewModel.showResetDialog = false
                         }) {
-                            Text("Reset Password")
+                            Text(stringResource(R.string.reset_password))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { viewModel.showResetDialog = false }) {
-                            Text("Cancel")
+                            Text(stringResource(R.string.cancel))
                         }
                     },
                     text = {

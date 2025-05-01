@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,8 +45,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.components.PasswordTextField
-import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
-import com.cenkeraydin.ttagmobil.data.model.User
+import com.cenkeraydin.ttagmobil.data.model.auth.RegisterRequest
+import com.cenkeraydin.ttagmobil.data.model.account.User
 import com.cenkeraydin.ttagmobil.ui.EmailConfirmDialog
 import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 
@@ -64,7 +65,7 @@ fun RegisterScreen(navController: NavController) {
     val viewModel: RegisterViewModel = viewModel()
     var showConfirmationDialog by remember { mutableStateOf(false) }
     val profileViewModel : ProfileViewModel = viewModel()
-    val roleText = if (selectedRole == "Driver") "Driver Register" else "Passenger Register"
+    val roleText = if (selectedRole == "Driver") stringResource(R.string.driver_register) else stringResource(R.string.passenger_register)
     val buttonColor = if (selectedRole == "Passenger") Color.Red else Color(0xFF00796B)
 
     Box(
@@ -88,7 +89,7 @@ fun RegisterScreen(navController: NavController) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Welcome to Ttag!",
+                text = stringResource(R.string.welcome_to_ttag),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -103,10 +104,10 @@ fun RegisterScreen(navController: NavController) {
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                RoleSelectionButton("Passenger", selectedRole == "Passenger") {
+                RoleSelectionButton(stringResource(R.string.passenger), selectedRole == "Passenger") {
                     selectedRole = "Passenger"
                 }
-                RoleSelectionButton("Driver", selectedRole == "Driver") {
+                RoleSelectionButton(stringResource(R.string.driver), selectedRole == "Driver") {
                     selectedRole = "Driver"
                 }
             }
@@ -124,7 +125,7 @@ fun RegisterScreen(navController: NavController) {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name", color = Color.White) },
+                label = { Text(stringResource(R.string.name), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -143,7 +144,7 @@ fun RegisterScreen(navController: NavController) {
             OutlinedTextField(
                 value = surName,
                 onValueChange = { surName = it },
-                label = { Text("Surname", color = Color.White) },
+                label = { Text(stringResource(R.string.surname), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -162,7 +163,7 @@ fun RegisterScreen(navController: NavController) {
             OutlinedTextField(
                 value = userName,
                 onValueChange = { userName = it },
-                label = { Text("Username", color = Color.White) },
+                label = { Text(stringResource(R.string.username), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -180,7 +181,7 @@ fun RegisterScreen(navController: NavController) {
             OutlinedTextField(
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
-                label = { Text("Phone", color = Color.White) },
+                label = { Text(stringResource(R.string.phone), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -197,7 +198,7 @@ fun RegisterScreen(navController: NavController) {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email", color = Color.White) },
+                label = { Text(stringResource(R.string.email), color = Color.White) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
@@ -237,28 +238,31 @@ fun RegisterScreen(navController: NavController) {
                             }
                         },
                         selectedRole = selectedRole,
+                        context = context,
                         onError = {
                             Log.e("RegisterError", "Kayıt başarısız: $it")
                             Toast.makeText(context, "Kayıt başarısız: $it", Toast.LENGTH_SHORT).show()
                         }
                     )
                     val user = User(
+                        id = "",
                         firstName = name,
                         lastName = surName,
                         phoneNumber = phoneNumber,
                         email = email,
-                        userName = userName
+                        userName = userName,
+                        pictureUrl = "",
                     )
                     profileViewModel.setUser(user)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Register", color = Color.White)
+                Text(stringResource(R.string.register), color = Color.White)
             }
 
             TextButton(onClick = { navController.navigate("login") }) {
-                Text("Already have an account? Sign In", color = Color.White)
+                Text(stringResource(R.string.already_have_account), color = Color.White)
             }
 
             viewModel.registrationState?.let { state ->

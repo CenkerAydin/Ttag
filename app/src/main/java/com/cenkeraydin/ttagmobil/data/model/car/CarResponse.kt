@@ -1,4 +1,4 @@
-package com.cenkeraydin.ttagmobil.data.model
+package com.cenkeraydin.ttagmobil.data.model.car
 
 data class CarResponse(
     val succeeded: Boolean,
@@ -14,5 +14,6 @@ data class Car(
     val carModel: String,
     val passengerCapacity: Int,
     val luggageCapacity: Int,
-    val price: Int
+    val price: Int,
+    val imageUrls: List<String>
 )

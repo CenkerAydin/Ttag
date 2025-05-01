@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TtagMobil</string>
+    <string name="delete">Hesabı Sil</string>
+    <string name="logout">Çıkış Yap</string>
+    <string name="password">Şifre</string>
+    <string name="updateInfo">Bilgileri Güncelle</string>
+    <string name="more_coming">Yakında daha fazlası geliyor…</string>
+    <string name="brand">Marka</string>
+    <string name="model">Model</string>
+    <string name="passenger_capacity">Yolcu Kapasitesi</string>
+    <string name="luggage_capacity">Bagaj Kapasitesi</string>
+    <string name="price">Fiyat</string>
+    <string name="close">Kapat</string>
+    <string name="car_images">Araç Görselleri</string>
+    <string name="reservation">Rezervasyon</string>
+    <string name="search_reservations">Rezervasyon Ara</string>
+    <string name="date">Tarih</string>
+    <string name="hour">Saat</string>
+    <string name="person_number">Kişi Sayısı</string>
+    <string name="from">Nereden</string>
+    <string name="to">Nereye</string>
+    <string name="date_error">Lütfen geçerli bir tarih girin (gg/AA/yyyy)</string>
+    <string name="hour_error">Lütfen geçerli bir saat girin (SS:dd)</string>
+    <string name="person_number_error">Lütfen geçerli bir kişi sayısı girin (örn. 1, 2, 3)</string>
+    <string name="welcome_back">Tekrar hoş geldiniz!</string>
+    <string name="passenger">Yolcu</string>
+    <string name="driver">Sürücü</string>
+    <string name="email">E-posta</string>
+    <string name="login">Giriş Yap</string>
+    <string name="forgot_password">Şifrenizi mi unuttunuz?</string>
+    <string name="dont_have_account">Hesabınız yok mu? Kayıt Ol</string>
+    <string name="reset_password">Şifreyi Sıfırla</string>
+    <string name="cancel">İptal</string>
+    <string name="confirm">Onayla</string>
+    <string name="welcome_to_ttag">Ttag\e Hoş Geldiniz</string>
+    <string name="driver_register">Sürücü Kaydı</string>
+    <string name="passenger_register">Yolcu Kaydı</string>
+    <string name="driver_login">Sürücü Girişi</string>
+    <string name="passenger_login">Yolcu Girişi</string>
+    <string name="name">Ad</string>
+    <string name="surname">Soyad</string>
+    <string name="phone">Telefon</string>
+    <string name="register">Kayıt Ol</string>
+    <string name="username">Kullanıcı Adı</string>
+    <string name="already_have_account">Zaten bir hesabınız var mı? Giriş Yap</string>
+    <string name="experience_years">Deneyim Yılı</string>
+    <string name="save">Kaydet</string>
+    <string name="cannot_empty">Bu alan boş bırakılamaz</string>
+
+</resources>

@@ -3,7 +3,6 @@ package com.cenkeraydin.ttagmobil.ui.logins
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,12 +10,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.cenkeraydin.ttagmobil.data.model.ForgotPasswordRequest
-import com.cenkeraydin.ttagmobil.data.model.LoginRequest
-import com.cenkeraydin.ttagmobil.data.model.ResetPasswordRequest
-import com.cenkeraydin.ttagmobil.data.model.User
+import com.cenkeraydin.ttagmobil.data.model.account.Driver
+import com.cenkeraydin.ttagmobil.data.model.auth.ForgotPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.LoginRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.ResetPasswordRequest
+import com.cenkeraydin.ttagmobil.data.model.account.User
 import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance
 import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
+import com.cenkeraydin.ttagmobil.util.PreferencesHelper
 import kotlinx.coroutines.launch
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -32,37 +33,73 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         request: LoginRequest,
         navController: NavController,
         context: Context,
-        profileViewModel: ProfileViewModel
+        profileViewModel: ProfileViewModel,
+        selectedRole: String
     ) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.loginUser(request)
+                val response = if (selectedRole == "Passenger") {
+                    RetrofitInstance.api.loginUser(request)  // 'loginDriver' API çağrısı
+                } else {
+                    RetrofitInstance.api.loginDriver(request)  // 'loginPassenger' API çağrısı
+                }
                 Log.e("LoginResponse", response.toString())
+
+                val preferencesHelper = PreferencesHelper(context)
+                preferencesHelper.saveSelectedRole(selectedRole)
 
                 if (response.isSuccessful) {
                     val authBody = response.body()
-
                     if (authBody != null && authBody.jwToken.isNotBlank()) {
                         // 🔐 Token'ı sakla
                         val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
                         prefs.edit().putString("jwt_token", authBody.jwToken).apply()
-
+                        Log.d("Login", "Token başarıyla alındı: ${authBody.jwToken}")
                         val userInfoResponse = RetrofitInstance.api.getUserInfo(request.email)
+                        val driverInfoResponse = RetrofitInstance.api.getDriverInfo(request.email)
+                        Log.e("UserInfoResponse", userInfoResponse.toString())
+                        Log.e("DriverInfoResponse", driverInfoResponse.toString())
+                        if (driverInfoResponse.isSuccessful) {
+                            val driverData = driverInfoResponse.body()?.data  // Burada data'ya erişim yapıyoruz
+                            Log.d("Driver Data", driverData.toString()) // Driver Data'yı logla
+                            if (driverData != null) {
+                                val driver = Driver(
+                                    firstName = driverData.firstName ?: "",
+                                    lastName = driverData.lastName ?: "",
+                                    email = driverData.email ?: "",
+                                    phoneNumber = driverData.phoneNumber ?: "",
+                                    identityNo = driverData.identityNo ?: "",
+                                    licenseUrl = driverData.licenseUrl ?: "",
+                                    experienceYear = driverData.experienceYear ?: 0,
+                                    pictureUrl = driverData.pictureUrl ?: "",
+                                    id = driverData.id ?: "",
+                                    userId = driverData.userId ?: "",
+                                    cars = driverData.cars ?: emptyList()
+                                )
+                                val driverCars = driverData.cars
+                                profileViewModel.saveCars(context,driverCars)
+                                profileViewModel.setDriver(driver)
+                            }
+                        } else {
+                            Log.e("LoginDriverError", "Kullanıcı bilgileri alınamadı!")
+                        }
 
                         if (userInfoResponse.isSuccessful) {
-                            val userData = userInfoResponse.body()?.data
-                            if (userData != null) {
+                            val userData = userInfoResponse.body()?.data  // Burada data'ya erişim yapıyoruz
+                            Log.d("User Data", userData.toString()) // User Data'yı logla                            if (userData != null) {
                                 val user = User(
-                                    firstName = userData.firstName ?: "",
-                                    lastName = userData.lastName ?: "",
-                                    email = userData.email ?: "",
-                                    phoneNumber = userData.phoneNumber ?: "",
-                                    userName = userData.userName ?: ""
+                                    id = userData?.id ?: "",
+                                    firstName = userData?.firstName ?: "",
+                                    lastName = userData?.lastName ?: "",
+                                    email = userData?.email ?: "",
+                                    phoneNumber = userData?.phoneNumber ?: "",
+                                    userName = userData?.userName ?: "",
+                                    pictureUrl = userData?.pictureUrl ?: ""
                                 )
                                 profileViewModel.setUser(user)
                             }
-                        } else {
-                            Log.e("LoginError", "Kullanıcı bilgileri alınamadı!")
+                        else {
+                            Log.e("LoginUserError", "Kullanıcı bilgileri alınamadı!")
                         }
                         loginState = "Giriş başarılı"
                         navController.navigate("home") {
@@ -70,11 +107,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     } else {
                         loginState = "Token alınamadı!"
-                        Log.e("LoginError", "authBody null veya jwToken boş")
+                        Log.e("LoginErr", "authBody null veya jwToken boş")
                     }
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    Log.e("LoginError", "API hata: ${response.code()} - $errorBody")
+                    Log.e("LoginErr", "API hata: ${response.code()} - $errorBody")
                     loginState = "error: $errorBody"
                 }
             } catch (e: Exception) {
@@ -113,7 +150,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun forgotPassword(email: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.forgotPassword(ForgotPasswordRequest(email))
+                val response = RetrofitInstance.api.forgotPasswordAccount(ForgotPasswordRequest(email))
                 if (response.isSuccessful) {
                     Log.e("ForgotPasswordResponse", response.toString())
                     val body = response.body()?.body
@@ -137,7 +174,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         email: String,
         token: String,
         password: String,
-        confirmPassword: String
+        confirmPassword: String,
+        selectedRole: String
     ) {
         viewModelScope.launch {
             try {
@@ -147,7 +185,11 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     password = password,
                     confirmPassword = confirmPassword
                 )
-                val response = RetrofitInstance.api.resetPassword(request)
+                val response = if (selectedRole == "Passenger") {
+                    RetrofitInstance.api.resetAccountPassword(request)
+                } else {
+                    RetrofitInstance.api.resetDriverPassword(request)
+                }
                 Log.e("ResetResponse", response.toString())
                 if (response.isSuccessful) {
                     val message = response.body()?.string()

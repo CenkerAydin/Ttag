@@ -1,4 +1,4 @@
-package com.cenkeraydin.ttagmobil.ui.home
+package com.cenkeraydin.ttagmobil.ui.reservation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +18,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -33,10 +32,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.util.isValidDate
 import com.cenkeraydin.ttagmobil.util.isValidHour
 import com.cenkeraydin.ttagmobil.util.isValidPersonCount
@@ -52,7 +53,7 @@ fun ReservationScreen(navHostController: NavHostController) {
                 .padding(16.dp)
         ) {
             Text(
-                text = "Reservation",
+                text = stringResource(R.string.reservation),
                 color = Color.White,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 14.sp,
@@ -67,7 +68,7 @@ fun ReservationScreen(navHostController: NavHostController) {
             )
 
 
-            ReservationScreen()
+            ReservationScreens()
 
             Button(
                 onClick = { /* Search Reservation */ },
@@ -77,14 +78,14 @@ fun ReservationScreen(navHostController: NavHostController) {
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 24.dp)
             ) {
-                Text("Search a Reservation", color = Color.White)
+                Text(stringResource(R.string.search_reservations), color = Color.White)
             }
         }
     }
 
 
 @Composable
-fun ReservationScreen() {
+fun ReservationScreens() {
     val gold = Color(0xFFD4AF37)
     val backgroundColor = Color(0xFF1E1E1E)
 
@@ -121,7 +122,7 @@ fun ReservationScreen() {
                     date = it
                     dateError = !isValidDate(it)
                 },
-                label = { Text("Date", color = Color.White) },
+                label = { Text(stringResource(R.string.date), color = Color.White) },
                 leadingIcon = {
                     Icon(Icons.Default.DateRange, contentDescription = null, tint = Color.Gray)
                 },
@@ -145,7 +146,7 @@ fun ReservationScreen() {
                     hour = it
                     hourError = !isValidHour(it)
                 },
-                label = { Text("Hour", color = Color.White) },
+                label = { Text(stringResource(R.string.hour), color = Color.White) },
                 leadingIcon = {
                     Icon(Icons.Default.Star, contentDescription = null, tint = Color.Gray)
                 },
@@ -172,7 +173,7 @@ fun ReservationScreen() {
                 personCount = it
                 personError = !isValidPersonCount(it)
             },
-            label = { Text("Person Number", color = Color.White) },
+            label = { Text(stringResource(R.string.person_number), color = Color.White) },
             leadingIcon = {
                 Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray)
             },
@@ -197,7 +198,7 @@ fun ReservationScreen() {
             OutlinedTextField(
                 value = fromWhere,
                 onValueChange = { fromWhere = it },
-                label = { Text("From", color = Color.White) },
+                label = { Text(stringResource(R.string.from), color = Color.White) },
                 leadingIcon = {
                     Icon(Icons.Default.Place, contentDescription = null, tint = Color.Gray)
                 },
@@ -217,7 +218,7 @@ fun ReservationScreen() {
             OutlinedTextField(
                 value = toWhere,
                 onValueChange = {toWhere = it},
-                label = { Text("To", color = Color.White) },
+                label = { Text(stringResource(R.string.to), color = Color.White) },
                 leadingIcon = {
                     Icon(Icons.Default.Place, contentDescription = null, tint = Color.Gray)
                 },
@@ -246,11 +247,11 @@ fun ReservationScreen() {
             colors = ButtonDefaults.buttonColors(backgroundColor = gold),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text(text = "Search a Reservation", color = Color.Black, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.search_reservations), color = Color.Black, fontWeight = FontWeight.Bold)
         }
         if (dateError) {
             Text(
-                text = "Please enter a valid date (dd/MM/yyyy)",
+                text = stringResource(R.string.date_error),
                 color = Color.Red,
                 fontSize = 16.sp,
                 modifier = Modifier
@@ -259,7 +260,7 @@ fun ReservationScreen() {
         }
         if (hourError) {
             Text(
-                text = "Please enter a valid time (HH:mm)",
+                text = stringResource(R.string.hour_error),
                 color = Color.Red,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)
@@ -268,7 +269,7 @@ fun ReservationScreen() {
 
         if (personError) {
             Text(
-                text = "Please enter a valid person number (e.g. 1, 2, 3)",
+                text = stringResource(R.string.person_number_error),
                 color = Color.Red,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(start = 4.dp, top = 4.dp)

@@ -1,13 +1,15 @@
 package com.cenkeraydin.ttagmobil.ui.logins
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cenkeraydin.ttagmobil.data.model.RegisterRequest
+import com.cenkeraydin.ttagmobil.data.model.auth.RegisterRequest
 import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance
+import com.cenkeraydin.ttagmobil.util.PreferencesHelper
 import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
@@ -17,6 +19,7 @@ class RegisterViewModel : ViewModel() {
     fun registerUser(
         request: RegisterRequest,
         selectedRole: String,
+        context: Context,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
@@ -30,6 +33,8 @@ class RegisterViewModel : ViewModel() {
 
                 Log.d("RegisterResponse", response.toString())
 
+                val preferencesHelper = PreferencesHelper(context)
+                preferencesHelper.saveSelectedRole(selectedRole)
                 if (response.isSuccessful) {
                     val message = response.body()?.string()
                     Log.d("Register", "Kayıt mesajı: $message")
