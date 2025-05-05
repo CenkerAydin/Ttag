@@ -1,25 +1,37 @@
 package com.cenkeraydin.ttagmobil.ui.home
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -51,7 +63,18 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
 
     val userReservations by viewModel.userReservations.collectAsState()
 
-    Column(modifier = modifier) { // Buraya modifier parametresi eklendi
+    var selectedStatusFilter by remember { mutableStateOf<Int?>(null) }
+
+    val statusOptions = listOf(
+        null to "Tümü",
+        0 to "Beklemede",
+        1 to "Onaylandı",
+        2 to "Tamamlandı",
+        3 to "Reddedildi",
+        4 to "İptal Edildi"
+    )
+
+    Column(modifier = modifier) {
         Text(
             text = "Welcome $userName 👋",
             style = MaterialTheme.typography.titleLarge,
@@ -59,85 +82,154 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        val sortedReservations = userReservations.sortedBy {
-            when (it.status) {
-                0 -> 0
-                4 -> 1
-                else -> 2
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            statusOptions.distinctBy { it.first }.forEach { (status, label) ->
+                val isSelected = selectedStatusFilter == status
+                OutlinedButton(
+                    onClick = { selectedStatusFilter = status },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSelected) Color(0xFF2196F3) else Color.White,
+                        contentColor = if (isSelected) Color.White else Color.Black
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSelected) Color(0xFF2196F3) else Color.LightGray
+                    ),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp)
+                    )
+                }
             }
         }
 
-        LazyColumn {
-            items(sortedReservations) { reservation ->
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Reservation Details",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-                        // Formatlama fonksiyonunu çağırıyoruz.
-                        val (startDate, startTime) = formatReservationDate(reservation.startDateTime)
-                        val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
+        val filteredReservations = userReservations
+            .filter { selectedStatusFilter == null || it.status == selectedStatusFilter }
+            .sortedBy {
+                when (it.status) {
+                    0 -> 0
+                    4 -> 1
+                    else -> 2
+                }
+            }
 
-                        Text("🚘 Sürücü: ${reservation.driverFirstName} ${reservation.driverLastName}", style = MaterialTheme.typography.bodyMedium)
-                        Text("📍 Nereden: ${reservation.fromWhere}", style = MaterialTheme.typography.bodyMedium)
-                        Text("🏁 Nereye: ${reservation.toWhere}", style = MaterialTheme.typography.bodyMedium)
-                        Text("🗓️ Başlangıç: $startDate", style = MaterialTheme.typography.bodyMedium)
-                        Text("🕒 Başlangıç Saati: $startTime", style = MaterialTheme.typography.bodyMedium)
-                        Text("🗓️ Bitiş: $endDate", style = MaterialTheme.typography.bodyMedium)
-                        Text("🕒 Bitiş Saati: $endTime", style = MaterialTheme.typography.bodyMedium)
-                        Text("💸 Ücret: ${reservation.price} ₺", style = MaterialTheme.typography.bodyMedium)
+        if (filteredReservations.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 64.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Uygun rezervasyon bulunamadı!",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        } else {
+            LazyColumn {
+                items(filteredReservations) { reservation ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                "Reservation Details",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
 
+                            val (startDate, startTime) = formatReservationDate(reservation.startDateTime)
+                            val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
 
-                        val statusColor = when (reservation.status) {
-                            0 -> Color.Black    // Pending
-                            1 -> Color.Green    // Approved
-                            3, 4 -> Color.Red   // Declined & Canceled
-                            else -> Color.Gray  // Diğer durumlar için
-                        }
-                        Text(
-                            text = when (reservation.status) {
-                                0 -> "Durum: Beklemede"
-                                1 -> "Durum: Onaylandı!"
-                                2 -> "Durum: Tamamlandı"
-                                3-> "Durum: İptal Edildi"
-                                4 -> "Durum: İptal Edildi"
-                                else -> "Durum: Bilinmiyor"
-                            },
-                            color = statusColor,
-                            fontWeight = FontWeight.Bold
-                        )
+                            Text(
+                                "🚘 Sürücü: ${reservation.driverFirstName} ${reservation.driverLastName}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "📍 Nereden: ${reservation.fromWhere}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "🏁 Nereye: ${reservation.toWhere}",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "🗓️ Başlangıç: $startDate",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "🕒 Başlangıç Saati: $startTime",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text("🗓️ Bitiş: $endDate", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                "🕒 Bitiş Saati: $endTime",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                "💸 Ücret: ${reservation.price} ₺",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
 
-                        if (reservation.status == 0) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Button(
-                                onClick = {
-                                    viewModel.cancelReservation(reservation.id, context)
+                            val statusColor = when (reservation.status) {
+                                0 -> Color.Black
+                                1,2 -> Color.Green
+                                3, 4 -> Color.Red
+                                else -> Color.Gray
+                            }
+
+                            Text(
+                                text = when (reservation.status) {
+                                    0 -> "Durum: Beklemede"
+                                    1 -> "Durum: Onaylandı!"
+                                    2 -> "Durum: Tamamlandı"
+                                    3, 4 -> "Durum: İptal Edildi"
+                                    else -> "Durum: Bilinmiyor"
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(
-                                    0xFFC62828
-                                )
-                                ),
-                            ) {
-                                Text("İptal Et", color = Color.White)
+                                color = statusColor,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            if (reservation.status == 0) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = {
+                                        viewModel.cancelReservation(reservation.id, context)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(
+                                            0xFFC62828
+                                        )
+                                    ),
+                                ) {
+                                    Text("İptal Et", color = Color.White)
+                                }
                             }
                         }
                     }
                 }
-
             }
         }
     }
 }
-
 

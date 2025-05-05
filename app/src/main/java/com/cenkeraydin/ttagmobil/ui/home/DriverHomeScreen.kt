@@ -1,8 +1,12 @@
 package com.cenkeraydin.ttagmobil.ui.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme
@@ -21,12 +26,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -59,6 +68,17 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
 
     val driverReservations by viewModel.driverReservations.collectAsState()
 
+    var selectedStatusFilter by remember { mutableStateOf<Int?>(null) }
+
+    val statusOptions = listOf(
+        null to "Tümü",
+        0 to "Beklemede",
+        1 to "Onaylandı",
+        2 to "Tamamlandı",
+        3 to "Reddedildi",
+        4 to "İptal Edildi"
+    )
+
     Column(modifier = modifier) { // Buraya modifier parametresi eklendi
         Text(
             text = "Welcome $driverName 👋",
@@ -66,19 +86,50 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
-
-        val sortedReservations = driverReservations.sortedBy {
-            when (it.status) {
-                0 -> 0
-                1-> 1
-                2 -> 2
-                3 -> 3
-                else -> 4
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            statusOptions.distinctBy { it.first }.forEach { (status, label) ->
+                val isSelected = selectedStatusFilter == status
+                OutlinedButton(
+                    onClick = { selectedStatusFilter = status },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (isSelected) Color(0xFF2196F3) else Color.White,
+                        contentColor = if (isSelected) Color.White else Color.Black
+                    ),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (isSelected) Color(0xFF2196F3) else Color.LightGray
+                    ),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp)
+                    )
+                }
             }
         }
+        val filteredReservations = driverReservations
+            .filter { selectedStatusFilter == null || it.status == selectedStatusFilter }
+            .sortedBy {
+                when (it.status) {
+                    0 -> 0
+                    1-> 1
+                    2 -> 2
+                    3 -> 3
+                    else -> 4
+                }
+            }
 
         LazyColumn {
-            items(sortedReservations) { reservation ->
+            items(filteredReservations) { reservation ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
