@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -139,52 +141,52 @@ fun PassengerProfileScreen(user: User?) {
             }
         }
     }
-        Column(modifier = Modifier.padding(16.dp)) {
-            user?.let {
-                it.firstName?.let { it1 ->
-                    ReadOnlyTextField(
-                        label = stringResource(R.string.name),
-                        value = it1,
-                        leadingIcon = Icons.Default.Person
-                    )
-                }
-                it.lastName?.let { it1 ->
-                    ReadOnlyTextField(
-                        label = stringResource(R.string.surname),
-                        value = it1,
-                        leadingIcon = Icons.Default.Person
-                    )
-                }
-                it.phoneNumber?.let { it1 ->
-                    ReadOnlyTextField(
-                        label = stringResource(R.string.phone),
-                        value = it1,
-                        leadingIcon = Icons.Default.Phone
-                    )
-                }
-                it.email?.let { it1 ->
-                    ReadOnlyTextField(
-                        label = stringResource(R.string.email),
-                        value = it1,
-                        leadingIcon = Icons.Filled.Email
-                    )
-                }
-            } ?: CircularProgressIndicator()
-
-            UpdateInfoButton {
-                showDialog = true
-            }
-
-            if (showDialog && user != null) {
-                UpdateUserDialog(
-                    initialEmail = user.email,
-                    onDismiss = { showDialog = false },
-                    onConfirm = { request ->
-                        showDialog = false
-                        profileViewModel.updateUserInfo(request, context)
-                    }
+    Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
+        user?.let {
+            it.firstName?.let { it1 ->
+                ReadOnlyTextField(
+                    label = stringResource(R.string.name),
+                    value = it1,
+                    leadingIcon = Icons.Default.Person
                 )
             }
+            it.lastName?.let { it1 ->
+                ReadOnlyTextField(
+                    label = stringResource(R.string.surname),
+                    value = it1,
+                    leadingIcon = Icons.Default.Person
+                )
+            }
+            it.phoneNumber?.let { it1 ->
+                ReadOnlyTextField(
+                    label = stringResource(R.string.phone),
+                    value = it1,
+                    leadingIcon = Icons.Default.Phone
+                )
+            }
+            it.email?.let { it1 ->
+                ReadOnlyTextField(
+                    label = stringResource(R.string.email),
+                    value = it1,
+                    leadingIcon = Icons.Filled.Email
+                )
+            }
+        } ?: CircularProgressIndicator()
+
+        UpdateInfoButton {
+            showDialog = true
+        }
+
+        if (showDialog && user != null) {
+            UpdateUserDialog(
+                initialEmail = user.email,
+                onDismiss = { showDialog = false },
+                onConfirm = { request ->
+                    showDialog = false
+                    profileViewModel.updateUserInfo(request, context)
+                }
+            )
         }
     }
+}
 

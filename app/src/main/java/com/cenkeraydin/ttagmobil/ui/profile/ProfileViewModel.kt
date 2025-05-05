@@ -213,23 +213,30 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    suspend fun uploadDriverLicense(bitmap: Bitmap, context: Context, userId: String?){
+    suspend fun uploadDriverLicense(bitmap: Bitmap, context: Context, userId: String?) {
+
         val file = File(context.cacheDir, "driver_license.jpg")
         file.outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
         }
 
         val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("image", file.name, requestFile)
+        val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
         val userIdPart = userId?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        val response = api.uploadDriverLicense(imagePart, userIdPart!!)
+        try {
+            val response = api.uploadDriverLicense(imagePart, userIdPart)
+            if (response.isSuccessful) {
+                Log.d("LicenseUpload", "Başarılı")
+                "success" // Return a success indicator or the new URL if the API provides it
+            } else {
+                val errorBody = response.errorBody()?.string()
+                Log.e("LicenseUpload", "Hata: ${response.code()} - ${response.message()} - $errorBody")
 
-        if (response.isSuccessful) {
-            Log.d("LicenseUpload", "Başarılı")
-        } else {
-            Log.e("LicenseUpload", "Hata: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            Log.e("LicenseUpload", "Hata: ${e.message}")
+
         }
     }
-
 }

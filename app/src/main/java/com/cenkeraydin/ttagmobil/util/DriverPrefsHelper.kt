@@ -105,9 +105,26 @@ class DriverPrefsHelper(context: Context) {
     fun saveProfileImage(base64Image: String) {
         prefs.edit().putString("profile_image", base64Image).apply()
     }
+    fun saveLicenseImage(base64: String) {
+        prefs.edit().putString("licenseUrl", base64).apply()
+    }
 
     fun getProfileImage(): Bitmap? {
         val base64 = prefs.getString("profile_image", null) ?: return null
         return decodeBase64ToBitmap(base64)
+    }
+
+    fun getDriverId(): String? {
+        return prefs.getString("id", null)
+    }
+
+    fun getDriverName(): String? {
+        val firstName = prefs.getString("firstName", null)
+        val lastName = prefs.getString("lastName", null)
+        return if (firstName != null && lastName != null) {
+            "$firstName $lastName"
+        } else {
+            null
+        }
     }
 }

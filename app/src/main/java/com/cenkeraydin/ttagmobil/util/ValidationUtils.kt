@@ -1,32 +1,45 @@
 package com.cenkeraydin.ttagmobil.util
 
+import android.util.Log
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
-fun isValidDate(dateStr: String): Boolean {
-    return try {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        sdf.isLenient = false
-        sdf.parse(dateStr)
-        true
-    } catch (e: Exception) {
+fun isValidDate(date: String): Boolean {
+    val regex = Regex("""\d{4}-\d{2}-\d{2}""") // yyyy-MM-dd formatı
+    return if (date.matches(regex)) {
+        try {
+            LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            true
+        } catch (e: DateTimeParseException) {
+            Log.e("DateValidation", "Invalid date: $date, error: ${e.message}")
+            false
+        }
+    } else {
         false
     }
 }
 
-fun isValidHour(hourStr: String): Boolean {
-    return try {
-        val trimmed = hourStr.trim()
-        val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-        sdf.isLenient = false
-        sdf.parse(trimmed) != null
-    } catch (e: Exception) {
-        false
-    }
+fun isValidHour(hour: String): Boolean {
+    val regex = Regex("""\d{2}:\d{2}""") // HH:mm formatı
+    return hour.matches(regex)
 }
 
-fun isValidPersonCount(input: String): Boolean {
-    return input.trim().toIntOrNull()?.let { it > 0 } == true
+fun isValidPersonCount(count: String): Boolean {
+    return count.toIntOrNull()?.let { it > 0 } ?: false
+}
+
+fun createDateTime(date: String, time: String): LocalDateTime? {
+    return try {
+        val dateTimeString = "$date $time"
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        LocalDateTime.parse(dateTimeString, formatter)
+    } catch (e: DateTimeParseException) {
+        Log.e("DateTime", "Parsing failed: ${e.message}")
+        null
+    }
 }
 
 fun isPasswordValid(password: String): Boolean {
@@ -34,3 +47,4 @@ fun isPasswordValid(password: String): Boolean {
     val passwordPattern = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[^A-Za-z0-9])[A-Za-z\\d[^A-Za-z0-9]]{6,}\$"
     return password.matches(passwordPattern.toRegex())
 }
+

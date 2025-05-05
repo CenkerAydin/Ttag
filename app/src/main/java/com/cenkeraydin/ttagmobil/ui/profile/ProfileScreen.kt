@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,9 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.cenkeraydin.ttagmobil.components.DeleteAccountButton
 import com.cenkeraydin.ttagmobil.components.LogoutButton
 import com.cenkeraydin.ttagmobil.ui.logins.LoginViewModel
@@ -55,7 +59,7 @@ fun ProfileScreen(navHostController: NavHostController) {
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -74,7 +78,12 @@ fun ProfileScreen(navHostController: NavHostController) {
     }
 
 
-    }
+}
 
-
+@Preview
+@Composable
+fun ProfileScreenPreview() {
+    val navHostController = rememberNavController()
+    ProfileScreen(navHostController)
+}
 

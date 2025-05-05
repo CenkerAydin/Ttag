@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -78,7 +80,7 @@ fun DriverProfileScreen(driver: Driver?) {
     var profileBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var profileImageUrl by remember { mutableStateOf<String?>(null) }
     val uriHandler = LocalUriHandler.current
-    var licenseUrl = driver?.licenseUrl ?: ""
+    var licenseUrl by remember { mutableStateOf(driver?.licenseUrl ?: "") }
 
     LaunchedEffect(Unit) {
         profileBitmap = DriverPrefsHelper(context).getProfileImage()
@@ -108,35 +110,6 @@ fun DriverProfileScreen(driver: Driver?) {
             }
         }
     )
-
-
-    val licensePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent(),
-        onResult = { uri ->
-            uri?.let {
-                val bitmap = if (Build.VERSION.SDK_INT < 28) {
-                    MediaStore.Images.Media.getBitmap(context.contentResolver, it)
-                } else {
-                    val source = ImageDecoder.createSource(context.contentResolver, it)
-                    ImageDecoder.decodeBitmap(source)
-                }
-
-                val userId = UserPrefsHelper(context).getUserId()
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    val newUrl = profileViewModel.uploadDriverLicense(bitmap, context, userId)
-                    newUrl.let {
-                        withContext(Dispatchers.Main) {
-                            licenseUrl = it.toString()
-                            Toast.makeText(context, "Lisans güncellendi", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-        }
-    )
-
-
 
     Box(
         modifier = Modifier
@@ -184,7 +157,7 @@ fun DriverProfileScreen(driver: Driver?) {
     }
 
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
         driver?.let {
             ReadOnlyTextField(
                 label = stringResource(R.string.name),
@@ -243,16 +216,6 @@ fun DriverProfileScreen(driver: Driver?) {
                         )
                     }
 
-                    // Edit License Button (galeri açılır)
-                    IconButton(onClick = {
-                        licensePickerLauncher.launch("image/*") // Galeriyi aç
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit License",
-                            tint = Color(0xFFAD1457)
-                        )
-                    }
                 }
             }
 
@@ -273,11 +236,12 @@ fun DriverProfileScreen(driver: Driver?) {
         if (showDialog && driver != null) {
             UpdateDriverDialog(
                 initialEmail = driver.email,
-                initialLicenseUrl = driver.licenseUrl ?: "",
                 onDismiss = { showDialog = false },
                 onConfirm = { request ->
                     showDialog = false
                     profileViewModel.updateDriverInfo(request, context)
+                    licenseUrl = request.licenseUrl  // Güncellenmiş URL’i driver ekranına yaz
+
                 }
             )
         }

@@ -27,6 +27,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TextButton
@@ -77,11 +78,15 @@ fun DriverCarScreen(navHostController: NavHostController) {
     val context = LocalContext.current
     val error by viewModel.errorMessages
     var showDialog by remember { mutableStateOf(false) }
-    val prefs= context.getSharedPreferences("driver_prefs", Context.MODE_PRIVATE)
-    val id= prefs.getString("id", null)
+    val prefs = context.getSharedPreferences("driver_prefs", Context.MODE_PRIVATE)
+    val id = prefs.getString("id", null)
+    var refreshTrigger by remember { mutableStateOf(false) }
+    var refreshImage by remember { mutableStateOf(false) }
 
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
+        viewModel.getCarsForDriver(context)
+    }
+    LaunchedEffect(refreshImage) {
         viewModel.getCarsForDriver(context)
     }
 
@@ -120,7 +125,9 @@ fun DriverCarScreen(navHostController: NavHostController) {
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     items(cars) { car ->
-                        CarCard(car = car, navHostController = navHostController)
+                        CarCard(car = car, navHostController = navHostController , onImageUploaded = {
+                            refreshImage = !refreshImage
+                        })
                     }
                     item {
                         Spacer(modifier = Modifier.height(24.dp)) // Liste sonunda boşluk
@@ -139,7 +146,10 @@ fun DriverCarScreen(navHostController: NavHostController) {
                     AddCarDialog(
                         driverId = id!!,
                         onDismiss = { showDialog = false },
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        onCarAdded = {
+                            refreshTrigger = !refreshTrigger // ← tetikleyici burada değişir
+                        }
                     )
                 }
 
@@ -152,12 +162,12 @@ fun DriverCarScreen(navHostController: NavHostController) {
 }
 
 
-
 @Composable
-fun CarCard(car: Car, navHostController: NavHostController) {
+fun CarCard(car: Car, navHostController: NavHostController, onImageUploaded: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val imageUrls = car.imageUrls
+
 
     Card(
         modifier = Modifier
@@ -173,11 +183,11 @@ fun CarCard(car: Car, navHostController: NavHostController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(stringResource(R.string.brand) +": ${car.carBrand}")
-                Text(stringResource(R.string.model) +": ${car.carModel}")
-                Text(stringResource(R.string.passenger_capacity) +": ${car.passengerCapacity}")
-                Text(stringResource(R.string.luggage_capacity) +": ${car.luggageCapacity}")
-                Text(stringResource(R.string.price) +": ${car.price}")
+                Text(stringResource(R.string.brand) + ": ${car.carBrand}")
+                Text(stringResource(R.string.model) + ": ${car.carModel}")
+                Text(stringResource(R.string.passenger_capacity) + ": ${car.passengerCapacity}")
+                Text(stringResource(R.string.luggage_capacity) + ": ${car.luggageCapacity}")
+                Text(stringResource(R.string.price) + ": ${car.price}")
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -209,7 +219,14 @@ fun CarCard(car: Car, navHostController: NavHostController) {
     }
 
     if (showDialog) {
-        CarImageDialog(images = imageUrls,car.id,onDismiss = { showDialog = false })
+        CarImageDialog(
+            images = imageUrls,
+            car.id,
+            onDismiss = { showDialog = false },
+            onImageUploaded = {
+                onImageUploaded() // 👈 Bu LaunchedEffect’i tetikler
+            }
+        )
     }
 }
 
@@ -219,7 +236,9 @@ fun CarImageDialog(
     images: List<String>,
     carId: String,
     onDismiss: () -> Unit,
-    viewModel: CarViewModel = viewModel()
+    viewModel: CarViewModel = viewModel(),
+    onImageUploaded: () -> Unit
+
 ) {
     val context = LocalContext.current
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -242,6 +261,12 @@ fun CarImageDialog(
                     bitmap = bitmap,
                     context = context,
                     carId = carId,
+                    onSuccess = {
+                        onImageUploaded()
+                    },
+                    onError = {
+                        errorMessage = "Yükleme başarısız"
+                    }
                 )
             }
         }
@@ -271,11 +296,60 @@ fun CarImageDialog(
                             contentScale = ContentScale.Crop
                         )
                     }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(
+                            onClick = { carImagePickerLauncher.launch("image/*") },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color.White, // Mor renk
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .height(48.dp)
+                                .width(180.dp) // isteğe göre genişlik
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Image",
+                                modifier = Modifier.padding(end = 8.dp),
+                                tint = Color.Black // İkon rengi
+                            )
+                            Text("Görsel Ekle")
+                        }
+                    }
                 } else {
                     Text("Görsel bulunamadı.")
                     Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = { carImagePickerLauncher.launch("image/*") }) {
-                        Text("Görsel Ekle")
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(
+                            onClick = { carImagePickerLauncher.launch("image/*") },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = Color.White,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .height(48.dp)
+                                .width(180.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Image",
+                                modifier = Modifier.padding(end = 8.dp),
+                                tint = Color.Black // İkon rengi
+                            )
+                            Text("Görsel Ekle")
+                        }
                     }
                 }
 
@@ -295,7 +369,9 @@ fun CarImageDialog(
 fun AddCarDialog(
     driverId: String,
     onDismiss: () -> Unit,
-    viewModel: CarViewModel
+    viewModel: CarViewModel,
+    onCarAdded: () -> Unit
+
 ) {
     var carBrand by remember { mutableStateOf("") }
     var carModel by remember { mutableStateOf("") }
@@ -312,12 +388,26 @@ fun AddCarDialog(
         title = { Text("Araç Ekle") },
         text = {
             Column {
-                OutlinedTextField(value = carBrand, onValueChange = { carBrand = it }, label = { Text("Marka") })
-                OutlinedTextField(value = carModel, onValueChange = { carModel = it }, label = { Text("Model") })
-                OutlinedTextField(value = passengerCapacity, onValueChange = { passengerCapacity = it }, label = { Text("Yolcu Kapasitesi") })
-                OutlinedTextField(value = luggageCapacity, onValueChange = { luggageCapacity = it }, label = { Text("Bagaj Kapasitesi") })
-                OutlinedTextField(value = price, onValueChange = { price = it }, label = { Text("Fiyat") })
-                // Fotoğraf Seçme Butonu
+                OutlinedTextField(
+                    value = carBrand,
+                    onValueChange = { carBrand = it },
+                    label = { Text("Marka") })
+                OutlinedTextField(
+                    value = carModel,
+                    onValueChange = { carModel = it },
+                    label = { Text("Model") })
+                OutlinedTextField(
+                    value = passengerCapacity,
+                    onValueChange = { passengerCapacity = it },
+                    label = { Text("Yolcu Kapasitesi") })
+                OutlinedTextField(
+                    value = luggageCapacity,
+                    onValueChange = { luggageCapacity = it },
+                    label = { Text("Bagaj Kapasitesi") })
+                OutlinedTextField(
+                    value = price,
+                    onValueChange = { price = it },
+                    label = { Text("Fiyat") })
 
                 errorMessage?.let {
                     Text(text = it, color = Color.Red)
@@ -325,7 +415,7 @@ fun AddCarDialog(
             }
         },
         confirmButton = {
-            Button(
+            OutlinedButton(
                 onClick = {
                     isLoading = true
                     val request = CarCreateRequest(
@@ -342,6 +432,7 @@ fun AddCarDialog(
                             isLoading = false
                             onDismiss()
                             Toast.makeText(context, "Araç eklendi", Toast.LENGTH_SHORT).show()
+                            onCarAdded()
                         },
                         onError = { error ->
                             isLoading = false

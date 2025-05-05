@@ -1,0 +1,182 @@
+package com.cenkeraydin.ttagmobil.ui.home
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.cenkeraydin.ttagmobil.ui.reservation.ReservationViewModel
+import com.cenkeraydin.ttagmobil.util.DriverPrefsHelper
+import com.cenkeraydin.ttagmobil.util.UserPrefsHelper
+import com.cenkeraydin.ttagmobil.util.formatReservationDate
+
+@Composable
+fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val driverName = DriverPrefsHelper(context).getDriverName()
+    val currentDriverId = DriverPrefsHelper(context).getDriverId()
+
+    val lifecycleOwner = rememberUpdatedState(LocalLifecycleOwner.current)
+
+    DisposableEffect(key1 = lifecycleOwner.value.lifecycle) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.fetchDriverReservations(currentDriverId)
+            }
+        }
+
+        lifecycleOwner.value.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.value.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val driverReservations by viewModel.driverReservations.collectAsState()
+
+    Column(modifier = modifier) { // Buraya modifier parametresi eklendi
+        Text(
+            text = "Welcome $driverName 👋",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        val sortedReservations = driverReservations.sortedBy {
+            when (it.status) {
+                0 -> 0
+                1-> 1
+                2 -> 2
+                3 -> 3
+                else -> 4
+            }
+        }
+
+        LazyColumn {
+            items(sortedReservations) { reservation ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = "Rezervasyon Detayları",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF212121)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        val (startDate, startTime) = formatReservationDate(reservation.startDateTime)
+                        val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
+
+                        Text("🚘 Sürücü: ${reservation.driverFirstName} ${reservation.driverLastName}", style = MaterialTheme.typography.bodyMedium)
+                        Text("📍 Nereden: ${reservation.fromWhere}", style = MaterialTheme.typography.bodyMedium)
+                        Text("🏁 Nereye: ${reservation.toWhere}", style = MaterialTheme.typography.bodyMedium)
+                        Text("🗓️ Başlangıç: $startDate", style = MaterialTheme.typography.bodyMedium)
+                        Text("🕒 Başlangıç Saati: $startTime", style = MaterialTheme.typography.bodyMedium)
+                        Text("🗓️ Bitiş: $endDate", style = MaterialTheme.typography.bodyMedium)
+                        Text("🕒 Bitiş Saati: $endTime", style = MaterialTheme.typography.bodyMedium)
+                        Text("💸 Ücret: ${reservation.price} ₺", style = MaterialTheme.typography.bodyMedium)
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Duruma göre renkli etiket
+                        val (statusText, statusColor) = when (reservation.status) {
+                            0 -> "Beklemede" to Color(0xFF424242)
+                            1 -> "Onaylandı" to Color(0xFF2E7D32)
+                            2 -> "Tamamlandı" to Color(0xFF1565C0)
+                            3 -> "Reddedildi" to Color(0xFFC62828)
+                            4 -> "İptal Edildi" to Color(0xFFC62828)
+                            else -> "Bilinmiyor" to Color.Gray
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .background(color = statusColor.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp))
+                                .padding(horizontal = 12.dp, vertical = 6.dp)
+                        ) {
+                            Text(
+                                text = "Durum: $statusText",
+                                color = statusColor,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (reservation.status == 0) {
+                            Row {
+                                Button(
+                                    onClick = {
+                                        viewModel.approvedReservation(reservation.id, context)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Onayla", color = Color.White)
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Button(
+                                    onClick = {
+                                        viewModel.declinedReservation(reservation.id, context)
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Reddet", color = Color.White)
+                                }
+                            }
+                        }
+
+                        if (reservation.status == 1) {
+                            Button(
+                                onClick = {
+                                    viewModel.completedReservation(reservation.id, context)
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Tamamlandı", color = Color.White)
+                            }
+                        }
+                    }
+                }
+
+            }
+                }
+            }
+        }
+

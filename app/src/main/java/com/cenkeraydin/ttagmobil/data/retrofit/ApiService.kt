@@ -1,5 +1,6 @@
 package com.cenkeraydin.ttagmobil.data.retrofit
 
+import com.cenkeraydin.ttagmobil.data.model.account.AvailableDriver
 import com.cenkeraydin.ttagmobil.data.model.auth.AuthBody
 import com.cenkeraydin.ttagmobil.data.model.car.CarResponse
 import com.cenkeraydin.ttagmobil.data.model.account.DeleteAccountResponse
@@ -13,6 +14,8 @@ import com.cenkeraydin.ttagmobil.data.model.account.UpdateDriverInfoRequest
 import com.cenkeraydin.ttagmobil.data.model.account.UpdateUserInfoRequest
 import com.cenkeraydin.ttagmobil.data.model.account.UserInfoResponse
 import com.cenkeraydin.ttagmobil.data.model.car.CarCreateRequest
+import com.cenkeraydin.ttagmobil.data.model.reservation.CreateReservationRequest
+import com.cenkeraydin.ttagmobil.data.model.reservation.ReservationResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -24,6 +27,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
@@ -105,7 +109,7 @@ interface ApiService {
     @POST("api/image/driverLicenseEdit")
     suspend fun uploadDriverLicense(
         @Part image: MultipartBody.Part,
-        @Part("userId") userId: RequestBody,
+        @Part("userId") userId: RequestBody?,
         ): Response<Unit>
 
     @POST("api/DriverManagement/car")
@@ -117,6 +121,33 @@ interface ApiService {
         @Part image: MultipartBody.Part,
         @Part("CarId") carId: RequestBody,
     ): Response<Unit>
+
+    @GET("api/Reservation/available-drivers")
+    suspend fun getAvailableDrivers(
+        @Query("startDateTime") startDateTime: String,
+        @Query("endDateTime") endDateTime: String
+    ): Response<List<AvailableDriver>>
+
+    @POST("api/Reservation/CreateReservation")
+    suspend fun createReservation(@Body request: CreateReservationRequest): Response<ReservationResponse>
+
+    @GET("api/Reservation/user/{userId}")
+    suspend fun getUserReservations(
+        @Path("userId") userId: String?
+    ): List<ReservationResponse>
+
+    @GET("api/Reservation/driver/{driverId}")
+    suspend fun getDriverReservations(
+        @Path("driverId") driverId: String?
+    ): List<ReservationResponse>
+
+
+
+    @PUT("api/Reservation/{id}/status")
+    suspend fun updateReservationStatus(
+        @Path("id") reservationId: String,
+        @Body status: Int
+    )
 
 
 

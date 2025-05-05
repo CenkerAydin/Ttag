@@ -129,7 +129,9 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun uploadCarImage(
         bitmap: Bitmap,
         context: Context,
-        carId: String
+        carId: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
     ) {
         // Görseli geçici bir dosyaya kaydet
         val file = File(context.cacheDir, "car_image_${System.currentTimeMillis()}.jpg")

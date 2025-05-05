@@ -20,7 +20,7 @@
     <string name="person_number">Kişi Sayısı</string>
     <string name="from">Nereden</string>
     <string name="to">Nereye</string>
-    <string name="date_error">Lütfen geçerli bir tarih girin (gg/AA/yyyy)</string>
+    <string name="date_error">Lütfen geçerli bir tarih girin (yyyy-AA-gg)</string>
     <string name="hour_error">Lütfen geçerli bir saat girin (SS:dd)</string>
     <string name="person_number_error">Lütfen geçerli bir kişi sayısı girin (örn. 1, 2, 3)</string>
     <string name="welcome_back">Tekrar hoş geldiniz!</string>

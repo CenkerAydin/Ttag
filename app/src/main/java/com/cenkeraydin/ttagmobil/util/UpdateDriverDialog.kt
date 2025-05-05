@@ -1,16 +1,25 @@
 package com.cenkeraydin.ttagmobil.util
 
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,11 +39,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.data.model.account.UpdateDriverInfoRequest
 import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun UpdateDriverDialog(
     initialEmail: String?,
-    initialLicenseUrl: String,
     onDismiss: () -> Unit,
     onConfirm: (UpdateDriverInfoRequest) -> Unit
 ) {
@@ -44,11 +55,55 @@ fun UpdateDriverDialog(
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var experienceYear by remember { mutableStateOf("") }
+    var initialLicenseUrl by remember { mutableStateOf("") }
     var firstNameError by remember { mutableStateOf<String?>(null) }
     var lastNameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
     var experienceYearError by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val profileViewModel: ProfileViewModel = viewModel()
+    var licenseBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    val licenseImagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                Log.d("LicenseUpload", "Seçilen URI: $uri, Şema: ${uri.scheme}")
+                if (uri.scheme != "content") {
+                    Log.e("LicenseUpload", "Geçersiz URI şeması: ${uri.scheme}")
+                    return@let
+                }
+
+                val bitmap = try {
+                    if (Build.VERSION.SDK_INT < 28) {
+                        MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                    } else {
+                        val source = ImageDecoder.createSource(context.contentResolver, it)
+                        ImageDecoder.decodeBitmap(source)
+                    }
+                } catch (e: Exception) {
+                    Log.e("LicenseUpload", "Bitmap oluşturma hatası: ${e.message}")
+                    return@let
+                }
+
+                Log.d("LicenseUpload", "Bitmap: ${bitmap.width}x${bitmap.height}, isRecycled: ${bitmap.isRecycled}")
+                licenseBitmap = bitmap
+                val base64 = DriverPrefsHelper(context).encodeBitmapToBase64(bitmap)
+                DriverPrefsHelper(context).saveLicenseImage(base64)
+
+                val userId = UserPrefsHelper(context).getUserId()
+                if (userId.isNullOrBlank()) {
+                    Log.e("LicenseUpload", "userId boş veya null")
+                    return@let
+                }
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    profileViewModel.uploadDriverLicense(bitmap, context, userId)
+                }
+            }
+        }
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -166,6 +221,17 @@ fun UpdateDriverDialog(
                 )
                 if (experienceYearError != null) {
                     Text(experienceYearError!!, color = Color.Red, fontSize = 12.sp)
+                }
+
+                // Edit License Button (galeri açılır)
+                IconButton(onClick = {
+                    licenseImagePickerLauncher.launch("image/*") // Galeriyi aç
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit License",
+                        tint = Color(0xFFAD1457)
+                    )
                 }
             }
         },

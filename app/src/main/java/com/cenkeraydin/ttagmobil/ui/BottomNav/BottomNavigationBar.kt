@@ -14,13 +14,21 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomNavigationBar(navController: NavHostController) {
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Reservation,
-        BottomNavItem.Cars,
-        BottomNavItem.Profile,
-    )
+fun BottomNavigationBar(navController: NavHostController, userRole: String?) {
+    // Kullanıcı rolüne göre gösterilecek öğeleri seç
+    val items = when (userRole) {
+        "Driver" -> listOf(
+            BottomNavItem.Home,
+            BottomNavItem.Cars,
+            BottomNavItem.Profile
+        )
+        else -> listOf(
+            BottomNavItem.Home,
+            BottomNavItem.Reservation,
+            BottomNavItem.Cars,
+            BottomNavItem.Profile
+        )
+    }
 
     BottomNavigation(
         modifier = Modifier.height(72.dp),

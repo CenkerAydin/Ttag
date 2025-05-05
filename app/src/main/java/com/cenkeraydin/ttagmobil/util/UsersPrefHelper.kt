@@ -80,5 +80,9 @@ class UserPrefsHelper(context: Context) {
         return prefs.getString("id", null)
     }
 
+    fun getUserName(): String? {
+        return prefs.getString("name", null)
+    }
+
 
 }

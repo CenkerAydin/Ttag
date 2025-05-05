@@ -6,6 +6,6 @@ data class UpdateDriverInfoRequest(
     val lastName: String,
     val phoneNumber: String,
     val password: String,
-    val licenseUrl: String, // BU ALAN EKSİKTI
-    val experienceYear: Int// Driver-specific field
+    val licenseUrl: String,
+    val experienceYear: Int
 )

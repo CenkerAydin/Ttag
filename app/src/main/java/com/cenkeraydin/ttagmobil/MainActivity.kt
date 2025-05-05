@@ -18,8 +18,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             TtagMobilTheme {
                 val navController: NavHostController =rememberNavController()
+                val context = this
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                   AppNavHost(navController)
+                   AppNavHost(navController,context)
                 }
             }
         }

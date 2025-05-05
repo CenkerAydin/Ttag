@@ -19,7 +19,7 @@
     <string name="person_number">Number of Persons</string>
     <string name="from">From</string>
     <string name="to">To</string>
-    <string name="date_error">Please enter a valid date (dd/MM/yyyy)</string>
+    <string name="date_error">Please enter a valid date (yyyy-MM-dd)</string>
     <string name="hour_error">Please enter a valid hour (HH:mm)</string>
     <string name="person_number_error">Please enter a valid person number (e.g. 1, 2, 3</string>
     <string name="welcome_back">Welcome back!</string>
