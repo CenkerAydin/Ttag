@@ -102,7 +102,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                         contentColor = if (isSelected) Color.White else Color.Black
                     ),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(16.dp),
                     border = BorderStroke(
                         1.dp,
                         if (isSelected) Color(0xFF2196F3) else Color.LightGray

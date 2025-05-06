@@ -30,11 +30,13 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     private val _cars = mutableStateOf<List<Car>>(emptyList())
     val cars: State<List<Car>> = _cars
 
-    var cars_users by mutableStateOf<List<Car>>(emptyList())
-        private set
+    private val _carsUsers = MutableStateFlow<List<Car>>(emptyList())
+    val carsUsers: StateFlow<List<Car>> = _carsUsers
 
-    private var _errorMessages = mutableStateOf<String?>(null)
-    val errorMessages: State<String?> = _errorMessages
+
+    private val _errorMessages = MutableStateFlow<String?>(null)
+    val errorMessages: StateFlow<String?> = _errorMessages
+
 
     private val preferencesHelper = PreferencesHelper(application.applicationContext)
 
@@ -71,7 +73,9 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val response = RetrofitInstance.api.getCars()
                 if (response.isSuccessful) {
-                    cars_users = response.body()?.data ?: emptyList()
+                    response.body()?.let { carList ->
+                        _carsUsers.value = carList.data // <- Swagger'dan gelen veriye göre
+                    }
                 } else {
                     _errorMessages.value = response.errorBody()?.string()
                 }
@@ -84,13 +88,15 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     fun addCar(
         carRequest: CarCreateRequest,
         onSuccess: () -> Unit,
-        onError: (String) -> Unit
+        onError: (String) -> Unit,
+        context: Context
     ) {
         viewModelScope.launch {
             try {
                 val response = RetrofitInstance.api.addCar(carRequest)
                 Log.e("CarVM", "Response: ${response.body()}")
                 if (response.isSuccessful) {
+                    getCarsForDriver(context)
                     onSuccess()
                 } else {
                     onError("Hata kodu: ${response.code()}")
@@ -101,30 +107,6 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun getImageUrlsForCar(car: Car): List<String> {
-        return when (car.carModel.lowercase()) {
-            "vito" -> listOf(
-                "https://ttagstorage.blob.core.windows.net/ttagupload/vito1.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/vito2.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/vito3.jpg"
-            )
-
-            "cla" -> listOf(
-                "https://ttagstorage.blob.core.windows.net/ttagupload/cla1.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/cla2.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/cla3.jpg"
-
-            )
-
-            "g63" -> listOf(
-                "https://ttagstorage.blob.core.windows.net/ttagupload/g631.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/g632.jpg",
-                "https://ttagstorage.blob.core.windows.net/ttagupload/g633.jpg"
-            )
-
-            else -> listOf("https://ralfvanveen.com/en/glossary/placeholder/") // default görsel
-        }
-    }
 
     suspend fun uploadCarImage(
         bitmap: Bitmap,
@@ -133,26 +115,59 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
-        // Görseli geçici bir dosyaya kaydet
-        val file = File(context.cacheDir, "car_image_${System.currentTimeMillis()}.jpg")
-        file.outputStream().use {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-        }
+        try {
+            // Görseli geçici bir dosyaya kaydet
+            val file = File(context.cacheDir, "car_image_${System.currentTimeMillis()}.jpg")
+            file.outputStream().use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
 
-        // Görseli multipart olarak hazırlıyoruz
-        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
-        val carIdPart = carId.toRequestBody("text/plain".toMediaTypeOrNull())
-        val response = RetrofitInstance.api.uploadCarImage(imagePart, carIdPart)
+            // Görseli multipart olarak hazırlıyoruz
+            val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
+            val carIdPart = carId.toRequestBody("text/plain".toMediaTypeOrNull())
+            val response = RetrofitInstance.api.uploadCarImage(imagePart, carIdPart)
 
-        if (response.isSuccessful) {
-            Log.d("Upload", "Başarılı")
-        } else {
-            Log.e("Upload", "CarId $carId")
-            Log.e("Upload", "Hata: ${response.message()}")
-            Log.e("Upload", "Hata: ${response.code()}")
+            if (response.isSuccessful) {
+                Log.d("Upload", "Başarılı")
+                // Backend'den güncel arabalar listesini al
+                getCarsForDriver(context)
+                onSuccess() // Başarı durumunda onSuccess'i çağır
+            } else {
+                val errorMessage = "Hata: ${response.message()} (Kod: ${response.code()})"
+                Log.e("Upload", "CarId: $carId, $errorMessage")
+                _errorMessages.value = errorMessage // Hata mesajını akışa yaz
+                onError(errorMessage) // Hata durumunda onError'i çağır
+            }
+        } catch (e: Exception) {
+            val errorMessage = "İstisna: ${e.localizedMessage}"
+            Log.e("Upload", errorMessage)
+            _errorMessages.value = errorMessage
+            onError(errorMessage) // Hata durumunda onError'i çağır
         }
     }
+
+    fun deleteCar(carId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.deleteCar(carId)
+                if (response.isSuccessful) {
+
+                    _cars.value = _cars.value.filterNot { it.id == carId }
+                    _carsUsers.value = _carsUsers.value.filterNot { it.id == carId }
+
+                    onSuccess()
+                } else {
+                    Log.e("CarVM", "Hata: ${response.code()}")
+                    onError("Hata kodu: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                onError("İstisna: ${e.localizedMessage}")
+            }
+        }
+    }
+
+
 
 }
 

@@ -149,6 +149,10 @@ interface ApiService {
         @Body status: Int
     )
 
+    @DELETE("api/v1/DriverManagement/car/{carId}")
+    suspend fun deleteCar(
+        @Path("carId") carId: String
+    ): Response<Unit>
 
 
 

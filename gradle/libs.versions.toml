@@ -1,4 +1,5 @@
 [versions]
+accompanistPager = "0.34.0"
 activityComposeVersion = "1.9.0"
 agp = "8.7.2"
 coilCompose = "2.2.2"
@@ -27,6 +28,7 @@ roomRuntime = "2.7.1"
 runtimeLivedata = "1.8.0"
 
 [libraries]
+accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
 androidx-activity-compose-v190 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
