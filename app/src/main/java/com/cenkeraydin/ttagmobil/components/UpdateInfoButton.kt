@@ -20,7 +20,7 @@ fun UpdateInfoButton(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(top = 8.dp, bottom = 0.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF7C4DFF), // biraz daha modern mor tonu
             contentColor = Color.White

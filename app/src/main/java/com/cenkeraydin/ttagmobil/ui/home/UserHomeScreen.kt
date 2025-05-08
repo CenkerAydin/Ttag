@@ -1,6 +1,7 @@
 package com.cenkeraydin.ttagmobil.ui.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,12 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.ui.reservation.ReservationViewModel
 import com.cenkeraydin.ttagmobil.util.UserPrefsHelper
 import com.cenkeraydin.ttagmobil.util.formatReservationDate
@@ -66,17 +69,17 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
     var selectedStatusFilter by remember { mutableStateOf<Int?>(null) }
 
     val statusOptions = listOf(
-        null to "Tümü",
-        0 to "Beklemede",
-        1 to "Onaylandı",
-        2 to "Tamamlandı",
-        3 to "Reddedildi",
-        4 to "İptal Edildi"
+        null to stringResource(id = R.string.status_all),
+        0 to stringResource(id = R.string.status_pending),
+        1 to stringResource(id = R.string.status_approved),
+        2 to stringResource(id = R.string.status_completed),
+        3 to stringResource(id = R.string.status_rejected),
+        4 to stringResource(id = R.string.status_cancelled),
     )
 
     Column(modifier = modifier) {
         Text(
-            text = "Welcome $userName 👋",
+            text = "${stringResource(R.string.welcome)} $userName 👋",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -134,7 +137,7 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Uygun rezervasyon bulunamadı!",
+                    text = stringResource(R.string.no_available_reservations),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Gray,
                     fontWeight = FontWeight.SemiBold
@@ -151,64 +154,53 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
+                        Column(modifier = Modifier.padding(20.dp)) {
                             Text(
-                                "Reservation Details",
+                                text = stringResource(R.string.reservation_details),
                                 style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF212121)
                             )
+
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             val (startDate, startTime) = formatReservationDate(reservation.startDateTime)
                             val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
+                            val fromWhere = reservation.fromWhere.replace("+"," ")
+                            val toWhere = reservation.toWhere.replace("+"," ")
+                            Text(stringResource(R.string.driver_label, reservation.driverFirstName, reservation.driverLastName), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.from_label, fromWhere), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.to_label, toWhere), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.start_date_label, startDate), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.start_time_label, startTime), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.end_date_label, endDate), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.end_time_label, endTime), style = MaterialTheme.typography.bodyMedium)
+                            Text(stringResource(R.string.price_label, reservation.price), style = MaterialTheme.typography.bodyMedium)
 
-                            Text(
-                                "🚘 Sürücü: ${reservation.driverFirstName} ${reservation.driverLastName}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "📍 Nereden: ${reservation.fromWhere}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "🏁 Nereye: ${reservation.toWhere}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "🗓️ Başlangıç: $startDate",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "🕒 Başlangıç Saati: $startTime",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text("🗓️ Bitiş: $endDate", style = MaterialTheme.typography.bodyMedium)
-                            Text(
-                                "🕒 Bitiş Saati: $endTime",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                "💸 Ücret: ${reservation.price} ₺",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
 
-                            val statusColor = when (reservation.status) {
-                                0 -> Color.Black
-                                1,2 -> Color.Green
-                                3, 4 -> Color.Red
-                                else -> Color.Gray
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // Duruma göre renkli etiket
+                            val (statusText, statusColor) = when (reservation.status) {
+                                0 -> stringResource(R.string.status_pending) to Color(0xFF424242)
+                                1 -> stringResource(R.string.status_approved) to Color(0xFF2E7D32)
+                                2 -> stringResource(R.string.status_completed) to Color(0xFF1565C0)
+                                3 -> stringResource(R.string.status_rejected) to Color(0xFFC62828)
+                                4 -> stringResource(R.string.status_cancelled) to Color(0xFFC62828)
+                                else -> stringResource(R.string.unknown) to Color.Gray
                             }
 
-                            Text(
-                                text = when (reservation.status) {
-                                    0 -> "Durum: Beklemede"
-                                    1 -> "Durum: Onaylandı!"
-                                    2 -> "Durum: Tamamlandı"
-                                    3, 4 -> "Durum: İptal Edildi"
-                                    else -> "Durum: Bilinmiyor"
-                                },
-                                color = statusColor,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(color = statusColor.copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.status_prefix, statusText),
+                                    color = statusColor,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
 
                             if (reservation.status == 0) {
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -222,7 +214,7 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
                                         )
                                     ),
                                 ) {
-                                    Text("İptal Et", color = Color.White)
+                                    Text(stringResource(R.string.cancel), color = Color.White)
                                 }
                             }
                         }

@@ -74,7 +74,7 @@ fun UserCarScreen(navHostController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Our Cars", color = Color.White) },
+                title = { Text(text = stringResource(R.string.our_cars), color = Color.White) },
                 backgroundColor = Color.Black,
                 contentColor = Color.White
             )

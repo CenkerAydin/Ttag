@@ -33,12 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.ui.reservation.ReservationViewModel
 import com.cenkeraydin.ttagmobil.util.DriverPrefsHelper
 import com.cenkeraydin.ttagmobil.util.UserPrefsHelper
@@ -71,17 +73,18 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
     var selectedStatusFilter by remember { mutableStateOf<Int?>(null) }
 
     val statusOptions = listOf(
-        null to "Tümü",
-        0 to "Beklemede",
-        1 to "Onaylandı",
-        2 to "Tamamlandı",
-        3 to "Reddedildi",
-        4 to "İptal Edildi"
+        null to stringResource(id = R.string.status_all),
+        0 to stringResource(id = R.string.status_pending),
+        1 to stringResource(id = R.string.status_approved),
+        2 to stringResource(id = R.string.status_completed),
+        3 to stringResource(id = R.string.status_rejected),
+        4 to stringResource(id = R.string.status_cancelled),
     )
 
-    Column(modifier = modifier) { // Buraya modifier parametresi eklendi
+
+    Column(modifier = modifier) {
         Text(
-            text = "Welcome $driverName 👋",
+            text = "${stringResource(R.string.welcome)} $driverName 👋",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -140,7 +143,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
-                            text = "Rezervasyon Detayları",
+                            text = stringResource(R.string.reservation_details),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF212121)
@@ -150,26 +153,28 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
 
                         val (startDate, startTime) = formatReservationDate(reservation.startDateTime)
                         val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
+                        val fromWhere = reservation.fromWhere.replace("+"," ")
+                        val toWhere = reservation.toWhere.replace("+"," ")
+                        Text(stringResource(R.string.driver_label, reservation.driverFirstName, reservation.driverLastName), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.from_label, fromWhere), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.to_label, toWhere), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.start_date_label, startDate), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.start_time_label, startTime), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.end_date_label, endDate), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.end_time_label, endTime), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.price_label, reservation.price), style = MaterialTheme.typography.bodyMedium)
 
-                        Text("🚘 Sürücü: ${reservation.driverFirstName} ${reservation.driverLastName}", style = MaterialTheme.typography.bodyMedium)
-                        Text("📍 Nereden: ${reservation.fromWhere}", style = MaterialTheme.typography.bodyMedium)
-                        Text("🏁 Nereye: ${reservation.toWhere}", style = MaterialTheme.typography.bodyMedium)
-                        Text("🗓️ Başlangıç: $startDate", style = MaterialTheme.typography.bodyMedium)
-                        Text("🕒 Başlangıç Saati: $startTime", style = MaterialTheme.typography.bodyMedium)
-                        Text("🗓️ Bitiş: $endDate", style = MaterialTheme.typography.bodyMedium)
-                        Text("🕒 Bitiş Saati: $endTime", style = MaterialTheme.typography.bodyMedium)
-                        Text("💸 Ücret: ${reservation.price} ₺", style = MaterialTheme.typography.bodyMedium)
 
                         Spacer(modifier = Modifier.height(12.dp))
 
                         // Duruma göre renkli etiket
                         val (statusText, statusColor) = when (reservation.status) {
-                            0 -> "Beklemede" to Color(0xFF424242)
-                            1 -> "Onaylandı" to Color(0xFF2E7D32)
-                            2 -> "Tamamlandı" to Color(0xFF1565C0)
-                            3 -> "Reddedildi" to Color(0xFFC62828)
-                            4 -> "İptal Edildi" to Color(0xFFC62828)
-                            else -> "Bilinmiyor" to Color.Gray
+                            0 -> stringResource(R.string.status_pending) to Color(0xFF424242)
+                            1 -> stringResource(R.string.status_approved) to Color(0xFF2E7D32)
+                            2 -> stringResource(R.string.status_completed) to Color(0xFF1565C0)
+                            3 -> stringResource(R.string.status_rejected) to Color(0xFFC62828)
+                            4 -> stringResource(R.string.status_cancelled) to Color(0xFFC62828)
+                            else -> stringResource(R.string.unknown) to Color.Gray
                         }
 
                         Box(
@@ -178,7 +183,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                                 .padding(horizontal = 12.dp, vertical = 6.dp)
                         ) {
                             Text(
-                                text = "Durum: $statusText",
+                                text = stringResource(R.string.status_prefix, statusText),
                                 color = statusColor,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -195,7 +200,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Onayla", color = Color.White)
+                                    Text(stringResource(R.string.approve), color = Color.White)
                                 }
 
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -207,7 +212,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE53935)),
                                     modifier = Modifier.weight(1f)
                                 ) {
-                                    Text("Reddet", color = Color.White)
+                                    Text(stringResource(R.string.decline), color = Color.White)
                                 }
                             }
                         }
@@ -220,7 +225,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5)),
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Tamamlandı", color = Color.White)
+                                Text(stringResource(R.string.completed), color = Color.White)
                             }
                         }
                     }

@@ -235,13 +235,14 @@ fun DriverProfileScreen(driver: Driver?) {
 
         if (showDialog && driver != null) {
             UpdateDriverDialog(
-                initialEmail = driver.email,
+                initialEmail = driver.email ?: "",
+                initialPassword = "",  // Şifre alanı gereksiz olabilir
+                initialLicenseUrl = driver.licenseUrl ?: "",
                 onDismiss = { showDialog = false },
                 onConfirm = { request ->
                     showDialog = false
                     profileViewModel.updateDriverInfo(request, context)
                     licenseUrl = request.licenseUrl  // Güncellenmiş URL’i driver ekranına yaz
-
                 }
             )
         }

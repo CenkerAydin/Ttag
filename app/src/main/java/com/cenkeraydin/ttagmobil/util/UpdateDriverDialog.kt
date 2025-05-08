@@ -5,10 +5,18 @@ import android.graphics.ImageDecoder
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -18,8 +26,10 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,7 +38,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -36,34 +50,41 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.data.model.account.UpdateDriverInfoRequest
 import com.cenkeraydin.ttagmobil.ui.profile.ProfileViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun UpdateDriverDialog(
-    initialEmail: String?,
+    initialEmail: String,
+    initialPassword: String,
+    initialLicenseUrl: String,
+    onConfirm: (UpdateDriverInfoRequest) -> Unit,
     onDismiss: () -> Unit,
-    onConfirm: (UpdateDriverInfoRequest) -> Unit
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
-    var email by remember { mutableStateOf(initialEmail ?: "") }
+    val context = LocalContext.current
+    var email by remember { mutableStateOf(initialEmail) }
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf(initialPassword) }
     var experienceYear by remember { mutableStateOf("") }
-    var initialLicenseUrl by remember { mutableStateOf("") }
+    var licenseUrl by remember { mutableStateOf(initialLicenseUrl) }
+    var licenseBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     var firstNameError by remember { mutableStateOf<String?>(null) }
     var lastNameError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     var experienceYearError by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
-    val profileViewModel: ProfileViewModel = viewModel()
-    var licenseBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val licenseImagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
@@ -72,6 +93,7 @@ fun UpdateDriverDialog(
                 Log.d("LicenseUpload", "Seçilen URI: $uri, Şema: ${uri.scheme}")
                 if (uri.scheme != "content") {
                     Log.e("LicenseUpload", "Geçersiz URI şeması: ${uri.scheme}")
+                    errorMessage = "Geçersiz görsel formatı"
                     return@let
                 }
 
@@ -84,33 +106,53 @@ fun UpdateDriverDialog(
                     }
                 } catch (e: Exception) {
                     Log.e("LicenseUpload", "Bitmap oluşturma hatası: ${e.message}")
+                    errorMessage = "Görsel yüklenemedi: ${e.message}"
                     return@let
                 }
 
                 Log.d("LicenseUpload", "Bitmap: ${bitmap.width}x${bitmap.height}, isRecycled: ${bitmap.isRecycled}")
                 licenseBitmap = bitmap
-                val base64 = DriverPrefsHelper(context).encodeBitmapToBase64(bitmap)
-                DriverPrefsHelper(context).saveLicenseImage(base64)
+                isLoading = true
 
                 val userId = UserPrefsHelper(context).getUserId()
                 if (userId.isNullOrBlank()) {
                     Log.e("LicenseUpload", "userId boş veya null")
+                    errorMessage = "Kullanıcı kimliği bulunamadı"
+                    isLoading = false
                     return@let
                 }
 
+                // Görseli yükle
                 CoroutineScope(Dispatchers.IO).launch {
-                    profileViewModel.uploadDriverLicense(bitmap, context, userId)
+                    profileViewModel.uploadDriverLicense(
+                        bitmap = bitmap,
+                        context = context,
+                        userId = userId,
+                        onSuccess = { uploadedUrl ->
+                            licenseUrl = uploadedUrl // API'den dönen URL'yi licenseUrl'ye ata
+                            isLoading = false
+                            errorMessage = null
+                            Log.d("LicenseUpload", "Lisans görseli yüklendi: $uploadedUrl")
+                        },
+                        onError = { error ->
+                            isLoading = false
+                            errorMessage = error
+                            Log.e("LicenseUpload", "Lisans yükleme hatası: $error")
+                        }
+                    )
                 }
             }
         }
     )
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = {
+            errorMessage = null // Hata mesajını sıfırla
+            onDismiss()
+        },
         title = { Text(stringResource(R.string.updateInfo)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -129,7 +171,7 @@ fun UpdateDriverDialog(
                         firstName = it
                         firstNameError = null
                     },
-                    leadingIcon ={
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Ad ikonu"
@@ -148,7 +190,7 @@ fun UpdateDriverDialog(
                         lastName = it
                         lastNameError = null
                     },
-                    leadingIcon ={
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Surname ikonu"
@@ -167,7 +209,7 @@ fun UpdateDriverDialog(
                         phone = it
                         phoneError = null
                     },
-                    leadingIcon ={
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Phone,
                             contentDescription = "Phone ikonu"
@@ -181,14 +223,13 @@ fun UpdateDriverDialog(
                 if (phoneError != null) {
                     Text(phoneError!!, color = Color.Red, fontSize = 12.sp)
                 }
-
                 OutlinedTextField(
                     value = password,
                     onValueChange = {
                         password = it
                         passwordError = null
                     },
-                    leadingIcon ={
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = "Password ikonu"
@@ -202,20 +243,19 @@ fun UpdateDriverDialog(
                 if (passwordError != null) {
                     Text(passwordError!!, color = Color.Red, fontSize = 12.sp)
                 }
-
                 OutlinedTextField(
                     value = experienceYear,
                     onValueChange = {
                         experienceYear = it
                         experienceYearError = null
                     },
-                    leadingIcon ={
+                    leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = "Experience ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.experience_years)) },  // Driver-specific field
+                    label = { Text(stringResource(R.string.experience_years)) },
                     isError = experienceYearError != null,
                     singleLine = true
                 )
@@ -223,14 +263,50 @@ fun UpdateDriverDialog(
                     Text(experienceYearError!!, color = Color.Red, fontSize = 12.sp)
                 }
 
-                // Edit License Button (galeri açılır)
-                IconButton(onClick = {
-                    licenseImagePickerLauncher.launch("image/*") // Galeriyi aç
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit License",
-                        tint = Color(0xFFAD1457)
+                // Lisans görseli yükleme butonu
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFE3F2FD), RoundedCornerShape(8.dp))
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Lisans Görseli Değiştir",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    IconButton(onClick = {
+                        licenseImagePickerLauncher.launch("image/*") // Galeriyi aç
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit License",
+                            tint = Color(0xFFAD1457)
+                        )
+                    }
+                }
+
+
+                // Yükleme durumu veya görsel önizlemesi
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                // Hata mesajı
+                errorMessage?.let {
+                    Text(
+                        text = it,
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp)
                     )
                 }
             }
@@ -261,20 +337,18 @@ fun UpdateDriverDialog(
                     phoneError = "Geçerli bir telefon numarası girin"
                     hasError = true
                 }
-
                 if (experienceYear.isBlank()) {
-                    hasError = true
                     experienceYearError = "Bu alan boş olamaz"
+                    hasError = true
                 } else {
                     try {
                         val experience = experienceYear.toInt()
                         if (experience < 0 || experience > 50) {
-                            // Add appropriate error handling
-                            hasError = true
                             experienceYearError = "Deneyim yılı 0 ile 50 arasında olmalıdır"
+                            hasError = true
                         }
                     } catch (e: NumberFormatException) {
-                        // Add appropriate error handling
+                        experienceYearError = "Geçerli bir sayı girin"
                         hasError = true
                     }
                 }
@@ -286,8 +360,8 @@ fun UpdateDriverDialog(
                         lastName = lastName,
                         phoneNumber = phone,
                         password = password,
-                        licenseUrl = initialLicenseUrl, // driver'dan çek
-                        experienceYear = experienceYear.toInt() // Driver-specific field
+                        licenseUrl = licenseUrl, // Güncellenmiş licenseUrl
+                        experienceYear = experienceYear.toInt()
                     )
                     onConfirm(request)
                 }
@@ -296,7 +370,10 @@ fun UpdateDriverDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = {
+                errorMessage = null // Hata mesajını sıfırla
+                onDismiss()
+            }) {
                 Text(stringResource(R.string.cancel))
             }
         }

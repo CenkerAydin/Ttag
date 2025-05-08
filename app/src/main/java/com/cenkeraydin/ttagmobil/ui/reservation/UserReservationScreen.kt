@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,14 +22,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -46,16 +42,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.cenkeraydin.ttagmobil.R
+import com.cenkeraydin.ttagmobil.components.AutoCompleteTextField
 import com.cenkeraydin.ttagmobil.data.model.account.AvailableDriver
 import com.cenkeraydin.ttagmobil.util.createDateTime
 import com.cenkeraydin.ttagmobil.util.isValidDate
@@ -87,7 +82,7 @@ fun UserReservationScreen(navHostController: NavHostController,viewModel: Reserv
     var startHourError by remember { mutableStateOf(false) }
     val travelDuration by viewModel.travelDuration.collectAsState()
     val distanceInKm by viewModel.distanceInKm.collectAsState()
-    // ViewModel'den sürücü ve hata durumlarını al
+
     val drivers by viewModel.drivers.observeAsState(emptyList())
     val error by viewModel.error.observeAsState(null)
 
@@ -175,12 +170,6 @@ fun UserReservationScreen(navHostController: NavHostController,viewModel: Reserv
                             ).show()
                             Log.e("Reservation", "Geçersiz tarih veya saat formatı")
                         }
-                    } else if (travelDuration == null) {
-                        Toast.makeText(
-                            navHostController.context,
-                            "Mesafe ve süre hesaplanamadı, lütfen konumları kontrol edin",
-                            Toast.LENGTH_LONG
-                        ).show()
                     }
                 }
             )
@@ -198,7 +187,7 @@ fun UserReservationScreen(navHostController: NavHostController,viewModel: Reserv
             // Sürücü listesi
             if (drivers.isNotEmpty()) {
                 Text(
-                    text = "Müsait Sürücüler",
+                    text = stringResource(R.string.available_drivers),
                     color = gold,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
@@ -259,6 +248,8 @@ fun ReservationScreens(
     var toSearchText by remember { mutableStateOf(toWhere) }
     var fromPredictions by remember { mutableStateOf(listOf<AutocompletePrediction>()) }
     var toPredictions by remember { mutableStateOf(listOf<AutocompletePrediction>()) }
+
+
 
     LaunchedEffect(fromSearchText) {
         if (fromSearchText.isNotEmpty()) {
@@ -330,7 +321,7 @@ fun ReservationScreens(
             OutlinedTextField(
                 value = startDate,
                 onValueChange = onStartDateChange,
-                label = { Text("Start Date", color = Color.White) },
+                label = { Text(stringResource(R.string.date), color = Color.White) },
                 leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null, tint = Color.Gray) },
                 modifier = Modifier
                     .weight(1f)
@@ -349,7 +340,7 @@ fun ReservationScreens(
             OutlinedTextField(
                 value = startHour,
                 onValueChange = onStartHourChange,
-                label = { Text("Start Hour", color = Color.White) },
+                label = { Text(stringResource(R.string.hour), color = Color.White) },
                 leadingIcon = { Icon(Icons.Default.Star, contentDescription = null, tint = Color.Gray) },
                 modifier = Modifier
                     .weight(1f)
@@ -372,108 +363,45 @@ fun ReservationScreens(
 
         // From Where & To Where
         Column {
-            Box {
-                // OutlinedTextField (yazma kısmı - From)
-                OutlinedTextField(
-                    value = fromSearchText,
-                    onValueChange = { newValue ->
-                        fromSearchText = newValue
-                        onFromWhereChange(newValue)
-                        fromExpanded = true
-                    },
-                    label = { Text(stringResource(R.string.from), color = Color.White) },
-                    leadingIcon = { Icon(Icons.Default.Place, contentDescription = null, tint = Color.Gray) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused && fromSearchText.isNotEmpty()) {
-                                fromExpanded = true
-                            }
-                        },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = gold,
-                        unfocusedBorderColor = gold,
-                        textColor = Color.White,
-                        placeholderColor = Color.Gray,
-                        cursorColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                )
+            AutoCompleteTextField(
+                value = fromSearchText,
+                onValueChange = {
+                    fromSearchText = it
+                    onFromWhereChange(it)
+                    fromExpanded = true
+                },
+                suggestions = fromPredictions.map { it.getPrimaryText(null).toString() },
+                showSuggestions = fromExpanded,
+                onSuggestionSelected = {
+                    fromSearchText = it
+                    onFromWhereChange(it)
+                    fromExpanded = false
+                },
+                label = stringResource(R.string.from),
+                gold = gold
+            )
 
-                // DropdownMenu (seçenekler kısmı - From)
-                DropdownMenu(
-                    expanded = fromExpanded,
-                    onDismissRequest = { fromExpanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 56.dp)
-                ) {
-                    fromPredictions.forEach { prediction ->
-                        DropdownMenuItem(
-                            onClick = {
-                                fromSearchText = prediction.getPrimaryText(null).toString()
-                                onFromWhereChange(fromSearchText)
-                                fromExpanded = false
-                            },
-                            content = {
-                                Text(text = prediction.getPrimaryText(null).toString(), color = Color.Black)
-                            }
-                        )
-                    }
-                }
-            }
+
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box {
-                // OutlinedTextField (yazma kısmı - To)
-                OutlinedTextField(
-                    value = toSearchText,
-                    onValueChange = { newValue ->
-                        toSearchText = newValue
-                        onToWhereChange(newValue)
-                        toExpanded = true
-                    },
-                    label = { Text(stringResource(R.string.to), color = Color.White) },
-                    leadingIcon = { Icon(Icons.Default.Place, contentDescription = null, tint = Color.Gray) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .onFocusChanged { focusState ->
-                            if (focusState.isFocused && toSearchText.isNotEmpty()) {
-                                toExpanded = true
-                            }
-                        },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = gold,
-                        unfocusedBorderColor = gold,
-                        textColor = Color.White,
-                        placeholderColor = Color.Gray,
-                        cursorColor = Color.White
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                )
+            AutoCompleteTextField(
+                value = toSearchText,
+                onValueChange = {
+                    toSearchText = it
+                    onToWhereChange(it)
+                    toExpanded = true
+                },
+                suggestions = toPredictions.map { it.getPrimaryText(null).toString() },
+                showSuggestions = toExpanded,
+                onSuggestionSelected = {
+                    toSearchText = it
+                    onToWhereChange(it)
+                    toExpanded = false
+                },
+                label = stringResource(R.string.to),
+                gold = gold
+            )
 
-                // DropdownMenu (seçenekler kısmı - To)
-                DropdownMenu(
-                    expanded = toExpanded,
-                    onDismissRequest = { toExpanded = false },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 56.dp)
-                ) {
-                    toPredictions.forEach { prediction ->
-                        DropdownMenuItem(
-                            onClick = {
-                                toSearchText = prediction.getPrimaryText(null).toString()
-                                onToWhereChange(toSearchText)
-                                toExpanded = false
-                            },
-                            content = {
-                                Text(text = prediction.getPrimaryText(null).toString(), color = Color.Black)
-                            }
-                        )
-                    }
-                }
-            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

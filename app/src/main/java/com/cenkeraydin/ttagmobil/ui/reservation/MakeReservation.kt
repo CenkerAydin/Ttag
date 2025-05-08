@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,10 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.data.model.car.Car
 import com.cenkeraydin.ttagmobil.util.UserPrefsHelper
 
@@ -56,10 +57,11 @@ fun MakeReservationScreen(
 
     LaunchedEffect(reservationSuccess) {
         if (reservationSuccess) {
+            viewModel.clearDrivers()
             navHostController.navigate("home")
             Toast.makeText(
                 context,
-                "Rezervasyon başarıyla oluşturuldu.",
+                context.getString(R.string.reservation_created_success),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -84,7 +86,7 @@ fun MakeReservationScreen(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text("Rezervasyonu Onayla")
+                Text(stringResource(R.string.reservation_approved_button))
             }
         }
     ) { paddingValues ->
@@ -96,21 +98,21 @@ fun MakeReservationScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text("Rezervasyon Bilgileri", style = MaterialTheme.typography.h6)
+                Text(stringResource(R.string.reservation_info_title), style = MaterialTheme.typography.headlineSmall)
                 InfoGrid(
                     listOf(
-                        "Sürücü Adı" to (drivers?.firstName ?: ""),
-                        "Sürücü Soyadı" to (drivers?.lastName ?: ""),
-                        "Başlangıç Tarihi" to startDate,
-                        "Başlangıç Saati" to startHour,
-                        "Bitiş Tarihi" to endDate,
-                        "Bitiş Saati" to endHour,
-                        "Nereden" to fromWhere,
-                        "Nereye" to toWhere,
-                        "Kilometre" to "$km km"
+                        stringResource(R.string.driver_first_name) to (drivers?.firstName ?: ""),
+                        stringResource(R.string.driver_last_name) to (drivers?.lastName ?: ""),
+                        stringResource(R.string.start_date) to startDate,
+                        stringResource(R.string.start_time) to startHour,
+                        stringResource(R.string.end_date) to endDate,
+                        stringResource(R.string.end_time) to endHour,
+                        stringResource(R.string.from_where) to fromWhere,
+                        stringResource(R.string.to_where) to toWhere,
+                        stringResource(R.string.kilometers) to "$km km"
                     )
                 )
-                Text("Arabalar", style = MaterialTheme.typography.h6)
+                Text(stringResource(R.string.car_list_title), style = MaterialTheme.typography.headlineSmall)
             }
 
             items(cars) { car ->
@@ -131,8 +133,8 @@ fun MakeReservationScreen(
 @Composable
 fun InfoRow(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
-        Text(text = label, style = MaterialTheme.typography.body2, color = Color.Gray)
-        Text(text = value, style = MaterialTheme.typography.body1)
+        Text(text = label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -176,8 +178,8 @@ fun CarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onClick() },
-        backgroundColor = if (isSelected) Color(0xFFE0E0E0) else Color.White,
-        elevation = 4.dp
+        colors = CardDefaults.cardColors(containerColor = if (isSelected) Color(0xFFE0E0E0) else Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             modifier = Modifier
@@ -187,18 +189,18 @@ fun CarItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = car.carBrand, style = MaterialTheme.typography.h6)
-                Text(text = car.carModel, style = MaterialTheme.typography.h6)
-                Text(text = "Baz Fiyat: ${car.price} ₺", style = MaterialTheme.typography.body2)
-            }
+                Text(text = car.carBrand, style = MaterialTheme.typography.headlineSmall)
+                Text(text = car.carModel, style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    text = stringResource(R.string.base_price, car.price),
+                    style = MaterialTheme.typography.bodyMedium
+                )            }
             Text(
-                text = ("Toplam: $totalPrice"),
-                style = MaterialTheme.typography.body1,
+                text = stringResource(R.string.car_total, totalPrice),
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold
             )
 
         }
     }
 }
-
-

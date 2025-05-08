@@ -88,6 +88,10 @@ class ReservationViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun clearDrivers() {
+        _drivers.postValue(emptyList())
+    }
+
     fun createReservation(
         driverId: String?,
         userId: String?,

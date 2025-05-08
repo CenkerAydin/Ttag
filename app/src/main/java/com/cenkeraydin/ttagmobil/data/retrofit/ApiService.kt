@@ -12,6 +12,7 @@ import com.cenkeraydin.ttagmobil.data.model.auth.RegisterRequest
 import com.cenkeraydin.ttagmobil.data.model.auth.ResetPasswordRequest
 import com.cenkeraydin.ttagmobil.data.model.account.UpdateDriverInfoRequest
 import com.cenkeraydin.ttagmobil.data.model.account.UpdateUserInfoRequest
+import com.cenkeraydin.ttagmobil.data.model.account.UploadResponse
 import com.cenkeraydin.ttagmobil.data.model.account.UserInfoResponse
 import com.cenkeraydin.ttagmobil.data.model.car.CarCreateRequest
 import com.cenkeraydin.ttagmobil.data.model.reservation.CreateReservationRequest
@@ -110,7 +111,7 @@ interface ApiService {
     suspend fun uploadDriverLicense(
         @Part image: MultipartBody.Part,
         @Part("userId") userId: RequestBody?,
-        ): Response<Unit>
+        ): Response<UploadResponse>
 
     @POST("api/DriverManagement/car")
     suspend fun addCar(@Body car: CarCreateRequest): Response<Unit>

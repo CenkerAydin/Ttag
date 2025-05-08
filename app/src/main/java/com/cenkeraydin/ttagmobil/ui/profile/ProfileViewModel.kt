@@ -213,30 +213,52 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    suspend fun uploadDriverLicense(bitmap: Bitmap, context: Context, userId: String?) {
-
-        val file = File(context.cacheDir, "driver_license.jpg")
-        file.outputStream().use {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-        }
-
-        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
-        val userIdPart = userId?.toRequestBody("text/plain".toMediaTypeOrNull())
-
+    suspend fun uploadDriverLicense(
+        bitmap: Bitmap,
+        context: Context,
+        userId: String,
+        onSuccess: (String) -> Unit,
+        onError: (String) -> Unit
+    ) {
         try {
-            val response = api.uploadDriverLicense(imagePart, userIdPart)
-            if (response.isSuccessful) {
-                Log.d("LicenseUpload", "Başarılı")
-                "success" // Return a success indicator or the new URL if the API provides it
-            } else {
-                val errorBody = response.errorBody()?.string()
-                Log.e("LicenseUpload", "Hata: ${response.code()} - ${response.message()} - $errorBody")
+            // Görseli geçici bir dosyaya kaydet
+            val file = File(context.cacheDir, "license_image_${System.currentTimeMillis()}.jpg")
+            file.outputStream().use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
 
+            // Görseli multipart olarak hazırla
+            val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("image", file.name, requestFile)
+            val userIdPart = userId.toRequestBody("text/plain".toMediaTypeOrNull())
+
+            // API çağrısı
+            val response = api.uploadDriverLicense(imagePart, userIdPart)
+
+            if (response.isSuccessful) {
+                val responseBody = response.body() // UploadResponse türünde olmalı
+                Log.d("UploadLicense", "API Response: $responseBody")
+                if (responseBody != null) {
+                    // responseBody'yi kontrol et
+                    if (responseBody.success && responseBody.imageUrl.isNotBlank()) {
+                        val uploadedUrl = responseBody.imageUrl
+                        Log.d("UploadLicense", "Başarılı, URL: $uploadedUrl")
+                        onSuccess(uploadedUrl)
+                    } else {
+                        onError("Başarılı değil: ${responseBody.message}")
+                    }
+                } else {
+                    onError("Yanıt boş.")
+                }
+            } else {
+                val errorMessage = "Hata: ${response.message()} (Kod: ${response.code()})"
+                Log.e("UploadLicense", errorMessage)
+                onError(errorMessage)
             }
         } catch (e: Exception) {
-            Log.e("LicenseUpload", "Hata: ${e.message}")
-
+            val errorMessage = "İstisna: ${e.localizedMessage}"
+            Log.e("UploadLicense", errorMessage)
+            onError(errorMessage)
         }
     }
 }

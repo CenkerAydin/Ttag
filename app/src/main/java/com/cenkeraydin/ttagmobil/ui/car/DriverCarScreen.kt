@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -60,7 +58,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -76,8 +73,6 @@ import coil.compose.AsyncImage
 import com.cenkeraydin.ttagmobil.R
 import com.cenkeraydin.ttagmobil.data.model.car.Car
 import com.cenkeraydin.ttagmobil.data.model.car.CarCreateRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
@@ -90,7 +85,6 @@ fun DriverCarScreen(navHostController: NavHostController) {
     var showDialog by remember { mutableStateOf(false) }
     val prefs = context.getSharedPreferences("driver_prefs", Context.MODE_PRIVATE)
     val id = prefs.getString("id", null)
-    var refreshImage by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.getCarsForDriver(context)
@@ -107,7 +101,7 @@ fun DriverCarScreen(navHostController: NavHostController) {
                 topBar = {
                     TopAppBar(
                         title = {
-                            androidx.compose.material.Text(text = "Your Cars")
+                            androidx.compose.material.Text(text = stringResource(R.string.your_cars))
                         }, actions = {
                             IconButton(onClick = {
                                 showDialog = true
@@ -266,15 +260,15 @@ fun CarCard(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Aracı Sil") },
-            text = { Text("Bu aracı silmek istediğinizden emin misiniz?") },
+            title = { Text(stringResource(R.string.delete_car_title)) },
+            text = { Text(stringResource(R.string.delete_car_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
                         viewModel.deleteCar(
                             carId = car.id,
                             onSuccess = {
-                                Toast.makeText(context, "Araç silindi", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.car_deleted), Toast.LENGTH_SHORT).show()
                                 showDeleteDialog = false
                             },
                             onError = { error ->
@@ -284,12 +278,12 @@ fun CarCard(
                         )
                     }
                 ) {
-                    Text("Evet")
+                    Text(stringResource(R.string.yes))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Hayır")
+                    Text(stringResource(R.string.no))
                 }
             }
         )
