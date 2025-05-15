@@ -130,7 +130,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                         lastName = request.lastName,
                         identityNo = driver.value?.identityNo,
                         licenseUrl = driver.value?.licenseUrl,
-                        experienceYear = request.experienceYear,
+                        experienceYears = request.experienceYear,
                         phoneNumber = request.phoneNumber,
                         pictureUrl = driver.value?.pictureUrl,
                         id = driver.value?.id,
@@ -194,24 +194,31 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    suspend fun uploadProfilePicture(bitmap: Bitmap, context: Context, userId: String?) {
-        val file = File(context.cacheDir, "profile_picture.jpg")
-        file.outputStream().use {
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
-        }
+    fun uploadProfilePicture(bitmap: Bitmap, context: Context, userId: String?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val file = File(context.cacheDir, "profile_picture.jpg")
+                file.outputStream().use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                }
 
-        val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
-        val userIdPart = userId?.toRequestBody("text/plain".toMediaTypeOrNull())
+                val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
+                val userIdPart = userId?.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        val response = api.uploadProfilePicture(imagePart, userIdPart)
+                val response = api.uploadProfilePicture(imagePart, userIdPart)
 
-        if (response.isSuccessful) {
-            Log.d("Upload", "Başarılı")
-        } else {
-            Log.e("Upload", "Hata: ${response.code()}")
+                if (response.isSuccessful) {
+                    Log.d("Upload", "Başarılı")
+                } else {
+                    Log.e("Upload", "Hata: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("Upload", "Exception: ${e.message}")
+            }
         }
     }
+
 
     suspend fun uploadDriverLicense(
         bitmap: Bitmap,

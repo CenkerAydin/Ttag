@@ -8,7 +8,7 @@ data class Driver(
     val cars: List<Car>,
     val identityNo: String?,
     val licenseUrl: String?,
-    val experienceYear: Int?,
+    val experienceYears: Int?,
     val firstName: String,
     val lastName: String,
     val email: String?,

@@ -104,9 +104,8 @@ fun DriverProfileScreen(driver: Driver?) {
 
                 val userId = UserPrefsHelper(context).getUserId()
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    profileViewModel.uploadProfilePicture(bitmap, context, userId)
-                }
+                profileViewModel.uploadProfilePicture(bitmap, context, userId)
+
             }
         }
     )
@@ -178,7 +177,7 @@ fun DriverProfileScreen(driver: Driver?) {
             }
             ReadOnlyTextField(
                 label = stringResource(R.string.experience_years),
-                value = it.experienceYear.toString(),
+                value = it.experienceYears.toString(),
                 leadingIcon = Icons.Default.CheckCircle
             )
 

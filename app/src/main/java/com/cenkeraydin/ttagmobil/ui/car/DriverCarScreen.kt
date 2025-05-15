@@ -177,7 +177,7 @@ fun CarCard(
             .clickable { showDialog = true },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -214,18 +214,27 @@ fun CarCard(
             ){
                 Text(
                     text = "${stringResource(R.string.brand)}: ${car.carBrand}",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+
                 )
-                Text("${stringResource(R.string.model)}: ${car.carModel}")
-                Text("${stringResource(R.string.passenger_capacity)}: ${car.passengerCapacity}")
-                Text("${stringResource(R.string.luggage_capacity)}: ${car.luggageCapacity}")
+                Text(
+                    "${stringResource(R.string.model)}: ${car.carModel}",
+                    color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    "${stringResource(R.string.passenger_capacity)}: ${car.passengerCapacity}",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    "${stringResource(R.string.luggage_capacity)}: ${car.luggageCapacity}",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "${stringResource(R.string.price)}: \$${car.price}",
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1E88E5)
-                    )
+                        fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -349,10 +358,6 @@ fun CarImageDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Görsel yükleme butonu
-
-
-                // Yükleme göstergesi
                 if (isLoading) {
                     Box(
                         modifier = Modifier
@@ -363,7 +368,6 @@ fun CarImageDialog(
                         CircularProgressIndicator()
                     }
                 } else if (images.isNotEmpty()) {
-                    // Görseller için HorizontalPager
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
@@ -384,14 +388,12 @@ fun CarImageDialog(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Sayfa göstergesi
                     Text(
                         text = "${pagerState.currentPage + 1} / ${images.size}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 } else {
-                    // Görsel yoksa
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -406,8 +408,8 @@ fun CarImageDialog(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Henüz görsel yüklenmemiş.",
-                            color = Color.Gray
+                            text = stringResource(R.string.no_image),
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -426,7 +428,10 @@ fun CarImageDialog(
                         contentDescription = null,
                         modifier = Modifier.padding(end = 6.dp)
                     )
-                    Text("Görsel Ekle")
+                    Text(
+                        stringResource(R.string.add_image),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
 
                 // Hata mesajı
@@ -473,29 +478,33 @@ fun AddCarDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Araç Ekle") },
+        title = {
+            Text(
+            stringResource(R.string.add_car),
+            color = MaterialTheme.colorScheme.onSurface
+        ) },
         text = {
             Column {
                 OutlinedTextField(
                     value = carBrand,
                     onValueChange = { carBrand = it },
-                    label = { Text("Marka") })
+                    label = { Text(stringResource(R.string.brand)) })
                 OutlinedTextField(
                     value = carModel,
                     onValueChange = { carModel = it },
-                    label = { Text("Model") })
+                    label = { Text(stringResource(R.string.model)) })
                 OutlinedTextField(
                     value = passengerCapacity,
                     onValueChange = { passengerCapacity = it },
-                    label = { Text("Yolcu Kapasitesi") })
+                    label = { Text(stringResource(R.string.passenger_capacity)) })
                 OutlinedTextField(
                     value = luggageCapacity,
                     onValueChange = { luggageCapacity = it },
-                    label = { Text("Bagaj Kapasitesi") })
+                    label = { Text(stringResource(R.string.luggage_capacity)) })
                 OutlinedTextField(
                     value = price,
                     onValueChange = { price = it },
-                    label = { Text("Fiyat") })
+                    label = { Text(stringResource(R.string.price)) })
 
                 errorMessage?.let {
                     Text(text = it, color = Color.Red)
@@ -519,7 +528,7 @@ fun AddCarDialog(
                         onSuccess = {
                             isLoading = false
                             onDismiss()
-                            Toast.makeText(context, "Araç eklendi", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.added_car), Toast.LENGTH_SHORT).show()
                         },
                         onError = { error ->
                             isLoading = false
@@ -530,12 +539,12 @@ fun AddCarDialog(
                 },
                 enabled = !isLoading
             ) {
-                Text("Ekle")
+                Text(stringResource(R.string.add))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("İptal")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

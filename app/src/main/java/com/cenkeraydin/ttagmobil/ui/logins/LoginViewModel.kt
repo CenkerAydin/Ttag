@@ -70,7 +70,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                                     phoneNumber = driverData.phoneNumber ?: "",
                                     identityNo = driverData.identityNo ?: "",
                                     licenseUrl = driverData.licenseUrl ?: "",
-                                    experienceYear = driverData.experienceYear ?: 0,
+                                    experienceYears = driverData.experienceYears ?: 0,
                                     pictureUrl = driverData.pictureUrl ?: "",
                                     id = driverData.id ?: "",
                                     userId = driverData.userId ?: "",

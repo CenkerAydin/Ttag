@@ -147,7 +147,7 @@ fun CarCardUsers(car: Car, navHostController: NavHostController) {
             .clickable { showDialog = true },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -163,7 +163,7 @@ fun CarCardUsers(car: Car, navHostController: NavHostController) {
                     modifier = Modifier
                         .size(100.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.LightGray),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -171,10 +171,10 @@ fun CarCardUsers(car: Car, navHostController: NavHostController) {
                     modifier = Modifier
                         .size(100.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.LightGray),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Görsel Yok", fontSize = 12.sp, color = Color.Gray)
+                    Text("Görsel Yok", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Spacer(modifier = Modifier.width(16.dp))
@@ -183,18 +183,29 @@ fun CarCardUsers(car: Car, navHostController: NavHostController) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${stringResource(R.string.brand)}: ${car.carBrand}",
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text("${stringResource(R.string.model)}: ${car.carModel}")
-                Text("${stringResource(R.string.passenger_capacity)}: ${car.passengerCapacity}")
-                Text("${stringResource(R.string.luggage_capacity)}: ${car.luggageCapacity}")
+                Text(
+                    "${stringResource(R.string.model)}: ${car.carModel}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                )
+                Text(
+                    "${stringResource(R.string.passenger_capacity)}: ${car.passengerCapacity}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    "${stringResource(R.string.luggage_capacity)}: ${car.luggageCapacity}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "${stringResource(R.string.price)}: \$${car.price}",
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1E88E5)
-                    )
+                        fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.primary
+
                 )
             }
 

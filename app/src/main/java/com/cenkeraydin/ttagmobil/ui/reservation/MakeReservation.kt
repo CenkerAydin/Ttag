@@ -54,7 +54,8 @@ fun MakeReservationScreen(
     var selectedCar by remember { mutableStateOf<Car?>(null) }
     val context = LocalContext.current
     val reservationSuccess = viewModel.reservationSuccess.collectAsState().value
-
+    val replacedFromWhere = fromWhere.replace("+", " ")
+    val replacedToWhere = toWhere.replace("+", " ")
     LaunchedEffect(reservationSuccess) {
         if (reservationSuccess) {
             viewModel.clearDrivers()
@@ -107,8 +108,8 @@ fun MakeReservationScreen(
                         stringResource(R.string.start_time) to startHour,
                         stringResource(R.string.end_date) to endDate,
                         stringResource(R.string.end_time) to endHour,
-                        stringResource(R.string.from_where) to fromWhere,
-                        stringResource(R.string.to_where) to toWhere,
+                        stringResource(R.string.from_where) to replacedFromWhere,
+                        stringResource(R.string.to_where) to replacedToWhere,
                         stringResource(R.string.kilometers) to "$km km"
                     )
                 )
@@ -172,13 +173,17 @@ fun CarItem(
 
 ) {
     val totalPrice = car.price + (km * 2)
-
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.surfaceVariant
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = if (isSelected) Color(0xFFE0E0E0) else Color.White),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(

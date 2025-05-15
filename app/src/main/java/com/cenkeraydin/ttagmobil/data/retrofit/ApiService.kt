@@ -4,6 +4,7 @@ import com.cenkeraydin.ttagmobil.data.model.account.AvailableDriver
 import com.cenkeraydin.ttagmobil.data.model.auth.AuthBody
 import com.cenkeraydin.ttagmobil.data.model.car.CarResponse
 import com.cenkeraydin.ttagmobil.data.model.account.DeleteAccountResponse
+import com.cenkeraydin.ttagmobil.data.model.account.Driver
 import com.cenkeraydin.ttagmobil.data.model.account.DriverInfoResponse
 import com.cenkeraydin.ttagmobil.data.model.auth.ForgotPasswordRequest
 import com.cenkeraydin.ttagmobil.data.model.auth.ForgotPasswordResponse
@@ -154,6 +155,9 @@ interface ApiService {
     suspend fun deleteCar(
         @Path("carId") carId: String
     ): Response<Unit>
+
+    @GET("api/v1/DriverManagement/getAllDrivers")
+    suspend fun getAllDrivers(): Response<List<Driver>>
 
 
 

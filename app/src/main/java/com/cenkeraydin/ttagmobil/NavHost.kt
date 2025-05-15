@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cenkeraydin.ttagmobil.ui.BottomNav.BottomNavigationBar
 import com.cenkeraydin.ttagmobil.ui.car.CarListScreen
+import com.cenkeraydin.ttagmobil.ui.drivers.DriversScreen
 import com.cenkeraydin.ttagmobil.ui.home.HomeScreen
 import com.cenkeraydin.ttagmobil.ui.logins.LoginScreen
 import com.cenkeraydin.ttagmobil.ui.logins.RegisterScreen
@@ -33,7 +34,7 @@ fun AppNavHost(navController: NavHostController = rememberNavController(),contex
     val preferencesHelper = PreferencesHelper(context)
     val userRole = preferencesHelper.getSelectedRole() ?: "Passenger" // Varsayılan olarak 'passenger'
     val bottomBarRoutes = listOf(
-        "home", "reservation", "cars", "profile"
+        "home", "reservation", "cars", "profile", "drivers"
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -60,6 +61,9 @@ fun AppNavHost(navController: NavHostController = rememberNavController(),contex
             composable("home") { HomeScreen(navController, reservationViewModel) }
             composable("reservation") { UserReservationScreen(navController, reservationViewModel) }
             composable("cars") { CarListScreen(navController) }
+            composable("drivers"){
+                DriversScreen(navController)
+            }
             composable("profile") { ProfileScreen(navController) }
             composable(
                 route = "makeReservation/{startDate}/{startHour}/{endDate}/{endHour}/{fromWhere}/{toWhere}/{km}",

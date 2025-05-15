@@ -130,6 +130,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                     else -> 4
                 }
             }
+        Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn {
             items(filteredReservations) { reservation ->
@@ -139,14 +140,14 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Text(
                             text = stringResource(R.string.reservation_details),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF212121)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -155,7 +156,7 @@ fun DriverHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modif
                         val (endDate, endTime) = formatReservationDate(reservation.endDateTime)
                         val fromWhere = reservation.fromWhere.replace("+"," ")
                         val toWhere = reservation.toWhere.replace("+"," ")
-                        Text(stringResource(R.string.driver_label, reservation.driverFirstName, reservation.driverLastName), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.driver_label, reservation.driverFirstName, reservation.driverLastName), style = MaterialTheme.typography.bodyMedium,  color = MaterialTheme.colorScheme.onSurface)
                         Text(stringResource(R.string.from_label, fromWhere), style = MaterialTheme.typography.bodyMedium)
                         Text(stringResource(R.string.to_label, toWhere), style = MaterialTheme.typography.bodyMedium)
                         Text(stringResource(R.string.start_date_label, startDate), style = MaterialTheme.typography.bodyMedium)

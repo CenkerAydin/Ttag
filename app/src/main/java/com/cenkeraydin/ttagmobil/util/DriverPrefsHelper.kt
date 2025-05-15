@@ -29,7 +29,7 @@ class DriverPrefsHelper(context: Context) {
             putString("email", driver.email)
             putString("phoneNumber", driver.phoneNumber)
             putString("licenseUrl", driver.licenseUrl)
-            putInt("experienceYear", driver.experienceYear ?: 0)
+            putInt("experienceYear", driver.experienceYears ?: 0)
             putString("profile_image", driver.pictureUrl)
             val gson = Gson()
             val carsJson = gson.toJson(driver.cars)
@@ -56,7 +56,7 @@ class DriverPrefsHelper(context: Context) {
             email = email,
             phoneNumber = phoneNumber,
             licenseUrl = licenseUrl,
-            experienceYear = experienceYear,
+            experienceYears = experienceYear,
             pictureUrl = pictureUrl,
             id = id,
             userId = userId,

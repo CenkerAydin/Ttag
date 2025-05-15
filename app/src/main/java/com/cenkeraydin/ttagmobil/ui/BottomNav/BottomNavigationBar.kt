@@ -10,12 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController, userRole: String?) {
-    // Kullanıcı rolüne göre gösterilecek öğeleri seç
+
     val items = when (userRole) {
         "Driver" -> listOf(
             BottomNavItem.Home,
@@ -26,6 +27,7 @@ fun BottomNavigationBar(navController: NavHostController, userRole: String?) {
             BottomNavItem.Home,
             BottomNavItem.Reservation,
             BottomNavItem.Cars,
+            BottomNavItem.Drivers,
             BottomNavItem.Profile
         )
     }
@@ -41,7 +43,12 @@ fun BottomNavigationBar(navController: NavHostController, userRole: String?) {
         items.forEach { item ->
             BottomNavigationItem(
                 icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
+                label = {  Text(
+                    item.label,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    fontSize = 10.sp // bunu istersen ekleyebilirsin
+                ) },
                 selected = currentRoute == item.route,
                 onClick = {
                     if (currentRoute != item.route) {

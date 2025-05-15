@@ -152,14 +152,14 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
                             .padding(horizontal = 16.dp, vertical = 8.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(modifier = Modifier.padding(20.dp)) {
                             Text(
                                 text = stringResource(R.string.reservation_details),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF212121)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
@@ -182,13 +182,14 @@ fun UserHomeScreen(viewModel: ReservationViewModel, modifier: Modifier = Modifie
 
                             // Duruma göre renkli etiket
                             val (statusText, statusColor) = when (reservation.status) {
-                                0 -> stringResource(R.string.status_pending) to Color(0xFF424242)
-                                1 -> stringResource(R.string.status_approved) to Color(0xFF2E7D32)
-                                2 -> stringResource(R.string.status_completed) to Color(0xFF1565C0)
-                                3 -> stringResource(R.string.status_rejected) to Color(0xFFC62828)
-                                4 -> stringResource(R.string.status_cancelled) to Color(0xFFC62828)
-                                else -> stringResource(R.string.unknown) to Color.Gray
+                                0 -> stringResource(R.string.status_pending) to MaterialTheme.colorScheme.onSurfaceVariant
+                                1 -> stringResource(R.string.status_approved) to MaterialTheme.colorScheme.primary
+                                2 -> stringResource(R.string.status_completed) to MaterialTheme.colorScheme.tertiary
+                                3 -> stringResource(R.string.status_rejected) to MaterialTheme.colorScheme.error
+                                4 -> stringResource(R.string.status_cancelled) to MaterialTheme.colorScheme.error
+                                else -> stringResource(R.string.unknown) to MaterialTheme.colorScheme.outline
                             }
+
 
                             Box(
                                 modifier = Modifier

@@ -92,5 +92,16 @@
     <string name="available_drivers">Müsait Sürücüler</string>
     <string name="our_cars">Araçlarımız</string>
     <string name="your_cars">Araçlarınız</string>
+    <string name="our_drivers">Sürücülerimiz</string>
+    <string name="add_car">Araç Ekle</string>
+    <string name="added_car">Araç Eklendi.</string>
+    <string name="add">Ekle</string>
+    <string name="add_image">Görsel Ekle</string>
+    <string name="no_image">Henüz görsel eklenmemiş</string>
+
+
+
+
+
 
 </resources>
