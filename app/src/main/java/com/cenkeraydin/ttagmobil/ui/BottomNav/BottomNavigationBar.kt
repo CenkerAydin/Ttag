@@ -27,7 +27,6 @@ fun BottomNavigationBar(navController: NavHostController, userRole: String?) {
             BottomNavItem.Home,
             BottomNavItem.Reservation,
             BottomNavItem.Cars,
-            BottomNavItem.Drivers,
             BottomNavItem.Profile
         )
     }

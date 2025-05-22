@@ -2,15 +2,20 @@
 accompanistPager = "0.34.0"
 activityComposeVersion = "1.9.0"
 agp = "8.7.2"
+androidxRules = "1.6.1"
 coilCompose = "2.2.2"
 coilComposeVersion = "2.4.0"
 converterGson = "2.9.0"
+coreTestingVersion = "2.2.0"
 datastorePreferences = "1.1.4"
+jetbrainsKotlinxCoroutinesTest = "1.8.0"
+junitJupiter = "5.10.3"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
+kotlinxCoroutinesTest = "1.9.0"
 lifecycleRuntimeKtx = "2.6.2"
 activityCompose = "1.10.1"
 composeBom = "2024.04.01"
@@ -18,6 +23,11 @@ lifecycleViewmodelKtx = "2.8.7"
 lottieCompose = "6.3.0"
 material = "1.7.8"
 materialVersion = "1.12.0"
+mockitoAndroid = "5.0.0"
+mockitoInline = "5.2.0"
+mockitoKotlin = "5.1.0"
+mockk = "1.13.7"
+mockkMockkAndroid = "1.13.10"
 navigationRuntimeKtx = "2.8.9"
 navigationCompose = "2.8.9"
 places = "4.2.0"
@@ -25,7 +35,9 @@ playServicesMaps = "19.2.0"
 retrofit = "2.9.0"
 coreKtxVersion = "1.6.1"
 roomRuntime = "2.7.1"
+runner = "1.6.2"
 runtimeLivedata = "1.8.0"
+runtime = "1.0.0-alpha04"
 
 [libraries]
 accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
@@ -39,9 +51,13 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 coil-compose-v240 = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTestingVersion" }
+io-mockk-mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockkMockkAndroid" }
+jetbrains-kotlinx-coroutines-test-v180 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "jetbrainsKotlinxCoroutinesTest" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -55,15 +71,23 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 material = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-runtime = { group = "androidx.xr.runtime", name = "runtime", version.ref = "runtime" }
+test-rules = { module = "androidx.test:rules", version.ref = "androidxRules" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

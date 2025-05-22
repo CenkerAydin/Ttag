@@ -12,6 +12,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.cenkeraydin.ttagmobil.data.model.car.Car
 import com.cenkeraydin.ttagmobil.data.model.car.CarCreateRequest
+import com.cenkeraydin.ttagmobil.data.retrofit.ApiService
 import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance
 import com.cenkeraydin.ttagmobil.util.PreferencesHelper
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedRole = MutableStateFlow(preferencesHelper.getSelectedRole())
     val selectedRole: StateFlow<String?> = _selectedRole
 
+     var api: ApiService = RetrofitInstance.api
     fun getCarsForDriver(context: Context) {
         viewModelScope.launch {
             try {
@@ -50,7 +52,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
                 val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                 val email = prefs.getString("email", null)
 
-                val response = email?.let { RetrofitInstance.api.getDriverInfo(it) }
+                val response = email?.let { api.getDriverInfo(it) }
                 if (response != null) {
                     if (response.isSuccessful) {
                         response.body()?.let { driverInfo ->
@@ -71,7 +73,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     fun getCarsForUser() {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.getCars()
+                val response = api.getCars()
                 if (response.isSuccessful) {
                     response.body()?.let { carList ->
                         _carsUsers.value = carList.data // <- Swagger'dan gelen veriye göre
@@ -93,7 +95,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     ) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.addCar(carRequest)
+                val response = api.addCar(carRequest)
                 Log.e("CarVM", "Response: ${response.body()}")
                 if (response.isSuccessful) {
                     getCarsForDriver(context)
@@ -126,7 +128,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
             val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
             val imagePart = MultipartBody.Part.createFormData("Image", file.name, requestFile)
             val carIdPart = carId.toRequestBody("text/plain".toMediaTypeOrNull())
-            val response = RetrofitInstance.api.uploadCarImage(imagePart, carIdPart)
+            val response = api.uploadCarImage(imagePart, carIdPart)
 
             if (response.isSuccessful) {
                 Log.d("Upload", "Başarılı")
@@ -150,7 +152,7 @@ class CarViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteCar(carId: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.deleteCar(carId)
+                val response = api.deleteCar(carId)
                 if (response.isSuccessful) {
 
                     _cars.value = _cars.value.filterNot { it.id == carId }

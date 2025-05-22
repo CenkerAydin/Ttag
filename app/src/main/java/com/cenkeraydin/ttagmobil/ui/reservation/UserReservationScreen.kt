@@ -83,8 +83,8 @@ fun UserReservationScreen(navHostController: NavHostController,viewModel: Reserv
     val travelDuration by viewModel.travelDuration.collectAsState()
     val distanceInKm by viewModel.distanceInKm.collectAsState()
 
-    val drivers by viewModel.drivers.observeAsState(emptyList())
-    val error by viewModel.error.observeAsState(null)
+    val drivers by viewModel.drivers.collectAsState(emptyList())
+    val error by viewModel.error.collectAsState(null)
 
     // Distance Matrix API için servis oluştur
     val client = remember { OkHttpClient() }
@@ -414,7 +414,7 @@ fun ReservationScreens(
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor = gold),
             shape = RoundedCornerShape(8.dp),
-            enabled = !startDateError && !startHourError
+            enabled = startDate.isNotBlank() && startHour.isNotBlank() && !startDateError && !startHourError
         ) {
             Text(
                 text = stringResource(R.string.search_reservations),

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
@@ -33,7 +34,7 @@ fun ReadOnlyTextField(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = Color.Black,
             modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
         )
         Row(

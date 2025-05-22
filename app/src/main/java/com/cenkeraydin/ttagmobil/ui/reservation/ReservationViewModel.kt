@@ -11,6 +11,7 @@ import com.cenkeraydin.ttagmobil.data.model.account.AvailableDriver
 import com.cenkeraydin.ttagmobil.data.model.car.Car
 import com.cenkeraydin.ttagmobil.data.model.reservation.CreateReservationRequest
 import com.cenkeraydin.ttagmobil.data.model.reservation.ReservationResponse
+import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance
 import com.cenkeraydin.ttagmobil.data.retrofit.RetrofitInstance.api
 import com.cenkeraydin.ttagmobil.util.DriverPrefsHelper
 import com.cenkeraydin.ttagmobil.util.PreferencesHelper
@@ -28,10 +29,10 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.URLEncoder
 
-class ReservationViewModel(application: Application) : AndroidViewModel(application) {
+open class ReservationViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _drivers = MutableLiveData<List<AvailableDriver>>(emptyList())
-    val drivers: LiveData<List<AvailableDriver>> get() = _drivers
+    private val _drivers = MutableStateFlow<List<AvailableDriver>>(emptyList())
+    val drivers: StateFlow<List<AvailableDriver>> get() = _drivers
 
     private val _userReservations = MutableStateFlow<List<ReservationResponse>>(emptyList())
     val userReservations: StateFlow<List<ReservationResponse>> = _userReservations
@@ -39,8 +40,8 @@ class ReservationViewModel(application: Application) : AndroidViewModel(applicat
     private val _driverReservations = MutableStateFlow<List<ReservationResponse>>(emptyList())
     val driverReservations: StateFlow<List<ReservationResponse>> = _driverReservations
 
-    private val _error = MutableLiveData<String?>(null)
-    val error: LiveData<String?> get() = _error
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> get() = _error
 
     private val preferencesHelper = PreferencesHelper(application.applicationContext)
 
@@ -63,6 +64,7 @@ class ReservationViewModel(application: Application) : AndroidViewModel(applicat
     private val _travelDuration = MutableStateFlow(0)
     val travelDuration: StateFlow<Int> = _travelDuration
 
+    private val api = RetrofitInstance.api
 
 
     fun selectDriver(driver: AvailableDriver) {
@@ -76,20 +78,20 @@ class ReservationViewModel(application: Application) : AndroidViewModel(applicat
                 val response = api.getAvailableDrivers(startDateTime, endDateTime)
                 Log.e("TAG", "Response: $response")
                 if (response.isSuccessful) {
-                    _drivers.postValue(response.body() ?: emptyList())
-                    _error.postValue(null)
+                    _drivers.value = response.body() ?: emptyList() // postValue yerine value =
+                    _error.value = null
                 } else {
                     val errorBody = response.errorBody()?.string()
-                    _error.postValue("Hata: ${response.code()} - $errorBody")
+                    _error.value = "Hata: ${response.code()} - $errorBody"
                 }
             } catch (e: Exception) {
-                _error.postValue("Hata: ${e.message}")
+                _error.value = "Hata: ${e.message}"
             }
         }
     }
 
     fun clearDrivers() {
-        _drivers.postValue(emptyList())
+        _drivers.value=emptyList()
     }
 
     fun createReservation(

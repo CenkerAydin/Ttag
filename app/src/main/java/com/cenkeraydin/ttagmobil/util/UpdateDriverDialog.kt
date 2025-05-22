@@ -274,7 +274,8 @@ fun UpdateDriverDialog(
                 ) {
                     Text(
                         text = "Lisans Görseli Değiştir",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.Black
                     )
                     IconButton(onClick = {
                         licenseImagePickerLauncher.launch("image/*") // Galeriyi aç

@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +46,7 @@ fun UpdateUserDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.updateInfo)) },
+        title = { Text(stringResource(R.string.updateInfo), color = MaterialTheme.colorScheme.onSurface) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
@@ -58,7 +59,7 @@ fun UpdateUserDialog(
                             contentDescription = "E-posta ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.email)) },
+                    label = { Text(stringResource(R.string.email), color = MaterialTheme.colorScheme.onSurface) },
                     singleLine = true
                 )
                 OutlinedTextField(
@@ -73,7 +74,7 @@ fun UpdateUserDialog(
                             contentDescription = "Ad ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.name)) },
+                    label = { Text(stringResource(R.string.name), color = MaterialTheme.colorScheme.onSurface) },
                     isError = firstNameError != null,
                     singleLine = true
                 )
@@ -92,7 +93,7 @@ fun UpdateUserDialog(
                             contentDescription = "Surname ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.surname)) },
+                    label = { Text(stringResource(R.string.surname),color = MaterialTheme.colorScheme.onSurface) },
                     isError = lastNameError != null,
                     singleLine = true
                 )
@@ -111,7 +112,7 @@ fun UpdateUserDialog(
                             contentDescription = "Ad ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.phone)) },
+                    label = { Text(stringResource(R.string.phone),color = MaterialTheme.colorScheme.onSurface) },
                     isError = phoneError != null,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
@@ -132,7 +133,7 @@ fun UpdateUserDialog(
                             contentDescription = "Password ikonu"
                         )
                     },
-                    label = { Text(stringResource(R.string.password)) },
+                    label = { Text(stringResource(R.string.password),color = MaterialTheme.colorScheme.onSurface) },
                     isError = passwordError != null,
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true

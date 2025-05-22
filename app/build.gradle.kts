@@ -40,6 +40,15 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE.md"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/LICENSE-notice.md" // Added to resolve the new conflict
+        }
+    }
 }
 
 dependencies {
@@ -61,13 +70,26 @@ dependencies {
     implementation (libs.androidx.activity.compose.v190)
     implementation (libs.androidx.lifecycle.viewmodel.ktx)
     implementation (libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.runtime)
 
-
+    testImplementation (libs.core.testing)
+    testImplementation (libs.mockk)
+    testImplementation (libs.mockito.kotlin)
+    testImplementation (libs.mockito.inline)
+    testImplementation (libs.junit.jupiter)
+    testImplementation (libs.kotlinx.coroutines.test)
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation (libs.androidx.runner)
+    androidTestImplementation (libs.test.rules)
+    androidTestImplementation (libs.androidx.junit)
+    androidTestImplementation (libs.io.mockk.mockk.android)
+    androidTestImplementation (libs.mockito.android)
+    androidTestImplementation (libs.mockito.kotlin)
+    androidTestImplementation (libs.jetbrains.kotlinx.coroutines.test.v180)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 

@@ -181,42 +181,7 @@ fun DriverProfileScreen(driver: Driver?) {
                 leadingIcon = Icons.Default.CheckCircle
             )
 
-            licenseUrl.takeIf { it.isNotBlank() }?.let { licenseUrl ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color(0xFFE3F2FD), RoundedCornerShape(8.dp))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable {
-                                try {
-                                    uriHandler.openUri(licenseUrl)
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Geçerli bir bağlantı değil", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Link,
-                            contentDescription = "License URL",
-                            tint = Color(0xFF0D47A1)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "View License",
-                            color = Color(0xFF0D47A1),
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
 
-                }
-            }
 
 
             it.phoneNumber?.let { it1 ->

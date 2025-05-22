@@ -78,7 +78,7 @@ interface ApiService {
     @PUT("api/UserManagement/info")
     suspend fun updateUserInfo(
         @Body request: UpdateUserInfoRequest
-    ): Response<Void>
+    ): Response<Unit>
 
     @DELETE("api/UserManagement/account")
     suspend fun deleteAccount(

@@ -37,7 +37,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val userPrefs = UserPrefsHelper(application.applicationContext)
     private val driverPrefs = DriverPrefsHelper(application.applicationContext)
 
-    private val _user = MutableStateFlow<User?>(null)
+    val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
 
     private val _driver = MutableStateFlow<Driver?>(null)
@@ -45,7 +45,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     private val _selectedRole = MutableStateFlow(preferencesHelper.getSelectedRole())
     val selectedRole: StateFlow<String?> = _selectedRole
-
+    private val api = RetrofitInstance.api
 
     init {
         loadProfile(application)

@@ -24,7 +24,11 @@ fun isValidDate(date: String): Boolean {
 
 fun isValidHour(hour: String): Boolean {
     val regex = Regex("""\d{2}:\d{2}""") // HH:mm formatı
-    return hour.matches(regex)
+    if (!hour.matches(regex)) return false
+
+    val (hh, mm) = hour.split(":").map { it.toIntOrNull() ?: return false }
+
+    return hh in 0..23 && mm in 0..59
 }
 
 fun isValidPersonCount(count: String): Boolean {

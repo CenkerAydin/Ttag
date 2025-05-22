@@ -22,12 +22,11 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
     var loginState by mutableStateOf<String?>(null)
-        private set
 
     var showResetDialog by mutableStateOf(false)
     var resetEmail by mutableStateOf("")
     var resetToken by mutableStateOf("")
-
+    private var api = RetrofitInstance.api
 
     fun loginUser(
         request: LoginRequest,
@@ -39,9 +38,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val response = if (selectedRole == "Passenger") {
-                    RetrofitInstance.api.loginUser(request)  // 'loginDriver' API çağrısı
+                    api.loginUser(request)  // 'loginDriver' API çağrısı
                 } else {
-                    RetrofitInstance.api.loginDriver(request)  // 'loginPassenger' API çağrısı
+                    api.loginDriver(request)  // 'loginPassenger' API çağrısı
                 }
                 Log.e("LoginResponse", response.toString())
 
@@ -150,7 +149,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun forgotPassword(email: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitInstance.api.forgotPasswordAccount(ForgotPasswordRequest(email))
+                val response = api.forgotPasswordAccount(ForgotPasswordRequest(email))
                 if (response.isSuccessful) {
                     Log.e("ForgotPasswordResponse", response.toString())
                     val body = response.body()?.body
@@ -186,9 +185,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     confirmPassword = confirmPassword
                 )
                 val response = if (selectedRole == "Passenger") {
-                    RetrofitInstance.api.resetAccountPassword(request)
+                    api.resetAccountPassword(request)
                 } else {
-                    RetrofitInstance.api.resetDriverPassword(request)
+                    api.resetDriverPassword(request)
                 }
                 Log.e("ResetResponse", response.toString())
                 if (response.isSuccessful) {
