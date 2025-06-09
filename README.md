@@ -47,7 +47,89 @@
 
 ## 🖼️ Screenshots
 
+> ### 🚗 Driver - Dark Theme
+>
+> <div align="center">
+>   <img src="images/dark/driver/home_driver_dark.png" width="250" />
+>   <img src="images/dark/driver/cars_driver_dark.png" width="250" />
+>   <img src="images/dark/driver/profile_driver_dark.png" width="250" />
+> </div>
 
 
+> ### 🧍‍♂️ User - Dark Theme
+> <div align="center" style="border:1px solid #ccc; padding:16px; border-radius:8px;">
+>
+>  <img src="images/dark/user/home_user_dark.png" width="200" />
+>  <img src="images/dark/user/cars_user_dark.png" width="200" />
+>  <img src="images/dark/user/reservation_user.png" width="200" />
+>  <img src="images/dark/user/make_reservation_dark.png" width="200" />
+> </div>
+
+>### 🚗 Driver - Light Theme
+> <div align="center" style="border:1px solid #ccc; padding:16px; border-radius:8px;">
+> 
+>   <img src="images/light/driver/home_driver_light.png" width="250" />
+>  <img src="images/light/driver/cars_driver_light.png" width="250" />
+>  <img src="images/light/driver/profile_driver-light.png" width="250" />
+> </div>
+
+> ### 🧍‍♂️ User - Light Theme
+> <div align="center" style="border:1px solid #ccc; padding:16px; border-radius:8px;">
+> 
+>   <img src="images/light/user/home-user_light.png" width="200" />
+>   <img src="images/light/user/cars_user_light.png" width="200" />
+>   <img src="images/light/user/make_reservation_light.png" width="200" />
+> </div>
 
 
+# 🧪 Test Documentation – Project Validation Summary
+
+This document serves as a comprehensive overview confirming that the project components have been thoroughly tested and validated to meet quality standards and functional requirements.
+
+---
+
+## 🎯 Test Scope & Objectives
+
+- ✅ **Functionality Testing**  
+  Ensured that all core features perform as expected under various scenarios.
+
+- ✅ **UI/UX Verification**  
+  Confirmed that the user interface renders correctly across supported devices and themes (Light/Dark).
+
+- ✅ **Performance & Stability**  
+  Validated app responsiveness and stability during normal and peak usage.
+
+- ✅ **Localization Accuracy**  
+  Verified multilingual support and appropriate language rendering.
+
+- ✅ **Security & Authentication**  
+  Tested authentication flows and data protection mechanisms.
+
+---
+
+## 🛠️ Testing Tools & Frameworks
+
+| Aspect             | Tools & Frameworks                |
+|--------------------|---------------------------------|
+| Unit Testing       | JUnit, Mockito                  |
+| UI Testing         | Espresso, Compose Testing       |
+| API Testing        | Postman, Retrofit Mocking       |
+| Performance Testing | Android Profiler, LeakCanary    |
+| Localization Checks| Manual and Automated Scripts    |
+
+---
+
+## ✅ Conclusion
+
+All critical components have passed rigorous testing and the application is stable, performant, and ready for deployment. Continuous integration pipelines are in place to maintain quality throughout future development cycles.
+
+
+🚀 *Thank you for trusting in quality.*  
+
+
+## 🤝 Contributing
+
+We welcome contributions!
+
+```bash
+fork → clone → new branch → develop → commit → pull request
